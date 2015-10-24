@@ -3,7 +3,7 @@
 
 DXライブラリをLuaJITで使うためのffiバインディングです。
 
-**中身はほぼdxライブラリの.hファイルのコピペです。 ←重要 **
+中身はほぼdxライブラリの.hファイルのコピペです。 ←重要
 
 ## DXライブラリ
 
@@ -42,12 +42,12 @@ LuaJIT ( http://luajit.org/ )
 
 example02.lua
 
-![example01.png](example02.png "example02.png")
+![example01.png](example02.PNG "example02.png")
 
 example03.lua
 
-![example02.png](example03.png "example03.png")
+![example02.png](example03.PNG "example03.png")
 
 example01.lua
 
-![example03.png](example01.png "example01.png")
+![example03.png](example01.PNG "example01.png")
