@@ -4,9 +4,10 @@
 local ffi = require("ffi")
 --====================================================================
 
--- def 
+-- define
 --====================================================================
-ffi.cdef [[
+ffi.cdef 
+[[
 enum 
 {
 // DX_PI        = 3.1415926535897932384626433832795 
@@ -758,7 +759,8 @@ typedef struct _GUID {
 ]]
 --====================================================================
 -- 64bit or 32bit  ????
-if ffi.abi '64bit' then
+if ffi.abi '64bit' 
+then
     ffi.cdef[[
         typedef __int64 LONG_PTR;
         typedef unsigned __int64 ULONG_PTR;
@@ -770,7 +772,8 @@ else
     ]]  
 end
 --====================================================================
-ffi.cdef[[
+ffi.cdef
+[[
 typedef UINT_PTR            WPARAM;
 typedef LONG_PTR            LPARAM;
 typedef LONG_PTR            LRESULT;
@@ -779,7 +782,8 @@ typedef LRESULT (__stdcall* WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 --====================================================================
 --DXLib Struct Type
 --====================================================================
-ffi.cdef[[
+ffi.cdef
+[[
 
 typedef char DX_CHAR  ;
 
@@ -1298,7 +1302,8 @@ typedef struct tagIPDATA_IPv6
 --====================================================================
 -- DxDll 
 --====================================================================
-ffi.cdef[[
+ffi.cdef
+[[
 int  __stdcall dx_SetKeyInputStringColor( ULONGLONG  NmlStr, ULONGLONG  NmlCur, ULONGLONG  IMEStr, ULONGLONG  IMECur, ULONGLONG  IMELine, ULONGLONG  IMESelectStr, ULONGLONG  IMEModeStr, ULONGLONG  NmlStrE , ULONGLONG  IMESelectStrE , ULONGLONG  IMEModeStrE , ULONGLONG  IMESelectWinE , ULONGLONG  IMESelectWinF , ULONGLONG  SelectStrBackColor , ULONGLONG  SelectStrColor , ULONGLONG  SelectStrEdgeColor );
 int  __stdcall dx_GraphFilterS( int GrHandle, int FilterType, int Param0, int Param1, int Param2, int Param3, int Param4, int Param5 ) ;
 int  __stdcall dx_GraphFilterBltS( int SrcGrHandle, int DestGrHandle, int FilterType, int Param0, int Param1, int Param2, int Param3, int Param4, int Param5 ) ;
@@ -2977,8 +2982,12 @@ int  __stdcall dx_MV1SetupReferenceMesh( int  MHandle, int  FrameIndex, int  IsT
 int  __stdcall dx_MV1TerminateReferenceMesh( int  MHandle, int  FrameIndex, int  IsTransform, int  IsPositionOnly );
 int  __stdcall dx_MV1RefreshReferenceMesh( int  MHandle, int  FrameIndex, int  IsTransform, int  IsPositionOnly );
 MV1_REF_POLYGONLIST __stdcall dx_MV1GetReferenceMesh( int MHandle , int FrameIndex , int IsTransform , int IsPositionOnly ) ;
-
-
+]]
+--====================================================================
+-- version up
+--====================================================================
+ffi.cdef
+[[
 int  __stdcall dx_LoadFontDataToHandle( const char * FileName, int  EdgeSize );
 int  __stdcall dx_LoadFontDataFromMemToHandle( const void * FontDataImage, int  FontDataImageSize, int  EdgeSize );
 int  __stdcall dx_DrawCircleSoftImage( int  SIHandle, int  x, int  y, int  radius, int  r, int  g, int  b, int  a, int  FillFlag );
@@ -2986,7 +2995,7 @@ int  __stdcall dx_ConvertStringCharCodeFormat( int  SrcCharCodeFormat, const voi
 int  __stdcall dx_SetUseCharCodeFormat( int  CharCodeFormat);
 int  __stdcall dx_SetFontCharCodeFormat( int  CharCodeFormat);
 int  __stdcall dx_SetFontCharCodeFormatToHandle( int  CharCodeFormat, int  FontHandle);
-
+//====================================================================
 enum 
 {
      DX_CHARCODEFORMAT_SHIFTJIS = 932
@@ -3004,7 +3013,8 @@ enum
 --====================================================================
 -- load
 --====================================================================
-if ffi.abi '64bit' then
+if ffi.abi '64bit' 
+then
   return ffi.load 'DxLib_x64.dll'
 else
   return ffi.load 'DxLib.dll'
