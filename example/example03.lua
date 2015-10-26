@@ -88,7 +88,7 @@ do
     -- light
     -- DxLib.dx_SetUseLighting( false) ;
     DxLib.dx_SetLightDirection( DxLib.dx_VGet( 0.0, 0.0, 1.0 ) ) ;
-    DxLib.dx_SetLightPosition(DxLib.dx_VGet( 0, 0, 0.0 ) ) ;
+    DxLib.dx_SetLightPosition( DxLib.dx_VGet( 0, 0, 0.0 ) ) ;
 
     --draw sphire
     DxLib.dx_DrawSphere3D( DxLib.dx_VGet( 0, -0.5, 5 )  -- position

@@ -38,10 +38,10 @@ local fontSize = 12
 local count =0;
 
 -- image
-local graphicHandle = DxLib.dx_LoadGraph( "hatsuneMiku.png", false );
+local graphicHandle = DxLib.dx_LoadGraph( "resources/hatsuneMiku.png", false );
 
 -- sound
-local soundHandle = DxLib.dx_LoadSoundMem( "button.ogg" ,3,-1)
+local soundHandle = DxLib.dx_LoadSoundMem( "resources/button.ogg" ,3,-1)
 local playingSoundTable = {}
 local lastPlayTime = 0;
 
