@@ -30,6 +30,7 @@ function init ()
     --================================================================
     DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
     --================================================================
+     
     DxLib.dx_DxLib_Init();
     --================================================================
 end
@@ -58,7 +59,6 @@ DxLib.dx_GetHitKeyStateAll( lastKeyState );
 -- font
 local jpFontSize = 23
 local dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
---====================================================================                                            
 local loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
 DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
 local fontSize = 20
@@ -75,21 +75,62 @@ local lastTime =newTime;
 -- fps
 local fpsLimit = createFpsLimit();
 
--- multibyte string substring
 --====================================================================
-local strPos = 1;
-local makuranosoushi = 
-[[
-春はあけぼの。
-やうやう白くなり行く、山ぎは少しあかりて、
-紫だちたる雲の細くたなびきたる。 
+local makeScreenW = screenW/2
+local makeScreenH = screenH/2
+-- this screen can draw target.
+local screenHandle = DxLib.dx_MakeScreen( makeScreenW -- width
+                                        , makeScreenH -- height
+                                        , true ) ;    -- UseAlphaChannel
+local penImage = DxLib.dx_LoadGraph( "resources/pen.png", false );                                  
+--====================================================================
+function drawImageToScreen()
+    -- change drawTarget 
+    DxLib.dx_SetDrawScreen( screenHandle )
+    
+    -- clear fill 
+    DxLib.dx_ClearDrawScreen(nil) 
+    --================================================================
+    
+    --draw image to screenHandle 
+    local num = 20;
+    for i=1,num
+    do
+        DxLib.dx_DrawRotaGraph( makeScreenW*math.random()
+                              , makeScreenH*math.random()
+                              , math.random()*0.2 +0.2
+                              , math.rad(360*math.random())
+                              , penImage 
+                              , true     -- TransFlag,  
+                              , false ); -- invert flag (  TurnFlag)
+    end 
+    
+    -- restore drawTarget screen
+    DxLib.dx_SetDrawScreen( DxLib.DX_SCREEN_BACK );
+end 
+--====================================================================
 
-夏は夜。
-月のころはさらなり。やみもなほ、ほたるの多く飛びちがひたる。
-また、ただ一つ二つなど、ほのかにうち光りて行くもをかし。
-雨など降るもをかし。
-]]
+--prepare draw before main loop
+drawImageToScreen();
+
+--menu test
+DxLib.dx_SetUseMenuFlag(true); 
 --====================================================================
+DxLib.dx_AddMenuItem( DxLib.MENUITEM_ADD_INSERT
+                    , ""         -- parrent ItemNameID
+                    , -1         -- parrent ItemID 
+                    , false      -- SeparatorFlag
+                    , "Menu"     -- add menuName
+                    , 12345 ) ;  -- add menuID
+--====================================================================       
+DxLib.dx_AddMenuItem( DxLib.MENUITEM_ADD_CHILD  
+                    , "Menu"     -- parrent ItemNameID
+                    , 12345      -- parrent ItemID 
+                    , false      -- SeparatorFlag
+                    , "Child"    -- add menuName
+                    , 12346 ) ;  -- add menuID
+--====================================================================
+-- menu select check at onUpdate.
 
 --====================================================================
 function drawBackGround(width,height)
@@ -186,7 +227,8 @@ end
 function onMouseMove(mouseX,mouseY)end 
 --====================================================================
 function onMousePress(MouseEvent,mouseX,mouseY)
-    strPos =1;
+    -- redraw
+    drawImageToScreen();
 end
 --====================================================================
 function onMouseRelease(MouseEvent,mouseX,mouseY)end
@@ -199,23 +241,34 @@ function onKeyBoardRelease(KeyEvent)end
 --====================================================================
 function onUpdate(dt)
     --================================================================
-    count = count+dt/3
+    count = count+dt/3.5
     --================================================================
     if ( count >1.0)
     then
         count =0;
     end 
+    --================================================================
+    -- check menu select
+    --================================================================
+    if (DxLib.dx_CheckMenuItemSelect( "Child", 12346 ) == 1)
+    then
+        print ( "Child menu clicked")
+    end 
 end 
---====================================================================
-
 --====================================================================
 function onDraw(dt)
     --================================================================
     drawBackGround(screenW,screenH)
     --================================================================
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ADD , 255 ) ;
+    --================================================================
+    drawSineCurve(15,count)
     drawCicle(20,count,0,screenH,100,DxLib.dx_GetColor(100,100,180))
     drawCicle(20,count,screenW,0,100)
     drawCicle(20,count,mouseX[0],mouseY[0],30)
+    --================================================================
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255 ) ;
+    
     --================================================================
     DxLib.dx_SetFontSize(fontSize);
     
@@ -226,7 +279,7 @@ function onDraw(dt)
     drawString( str,10, 10);
     
     --================================================================
-    str ="substring test"
+    str ="make Screen test"
     local strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
     drawString( str,screenW-strWidth-10, screenH-20);
     
@@ -236,33 +289,23 @@ function onDraw(dt)
     drawString( str,screenW-strWidth-10, 10 );
     --================================================================
     
-    -- draw Substring text
-    local mbStrLengh = getMbLengh(makuranosoushi)
-    local lineNum = 0
-    local colum = 0
-    for i=1,strPos
-    do
-        local onestr = mbStrSub(makuranosoushi,i, i );
-        if (    string.byte(onestr) ~= 0x0D   -- "\r" string byte
-            and string.byte(onestr) ~= 0x0A ) -- "\n" string byte
-        then
-            drawStringToHandle(onestr,10 +15*colum,80 + 23*lineNum,dxFontHandle)
-            colum = colum+1;
-        else
-            lineNum = lineNum+1
-            colum =0;
-        end 
-    end 
+    local sineMod = math.sin(math.pi*2*count)
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255*math.abs(sineMod)) ;
     
-    -- increment string pos
-    --================================================================
-    if (strPos <mbStrLengh)
-    then 
-        strPos = strPos+0.45;
-    end 
+    --draw screen
+    drawImage( screenHandle
+             , makeScreenW/2
+             , makeScreenH
+             , 1 +0.5 * sineMod
+             , (math.pi*2) * count  ) -- math.rad(360*count)
+    
+    drawImage( screenHandle
+             , makeScreenW +makeScreenW/2
+             , makeScreenH
+             , 1 -0.5 * sineMod
+             , (math.pi*2) * count  ) 
+    
 end
---====================================================================
-
 --====================================================================
 function onExit()
     --================================================================
