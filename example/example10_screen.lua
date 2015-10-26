@@ -210,7 +210,6 @@ end
 function drawStringToHandle(str,x,y,fontHandle,color)
     local color_ = color or DxLib.dx_GetColor(0,0,0)
     DxLib.dx_DrawStringToHandle( x, y, str, color_ ,fontHandle, -1 ,false);
-    
 end 
 --====================================================================
 function getDrawBlendMode()
@@ -219,7 +218,7 @@ function getDrawBlendMode()
     local nowBlendModeParam  = ffi.new("int[1]")
     DxLib.dx_GetDrawBlendMode(nowBlendMode,nowBlendModeParam);
     --================================================================
-    return nowBlendMode,nowBlendModeParam
+    return nowBlendMode[0],nowBlendModeParam[0]
 end
 --====================================================================
 

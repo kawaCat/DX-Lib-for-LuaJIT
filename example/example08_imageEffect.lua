@@ -83,6 +83,7 @@ local lastTime =newTime;
 
 -- fps
 local fpsLimit = createFpsLimit();
+--====================================================================
 
 -- imageHandle Table
 local imageHandleTable = {} 
@@ -119,7 +120,7 @@ function drawBackGround(width,height)
                                            , 200/num *(i+1)+55
                                            , 255)
                         , true
-        )
+                        )
     end
 end
 --====================================================================
@@ -258,8 +259,6 @@ function onDraw(dt)
     local strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
     DxLib.dx_DrawString( screenW-strWidth-10, screenH-20, str, DxLib.dx_GetColor(0,0,0), -1 );
     
-    
-   
     -- fps 
     str =string.format("FPS:%.2f",fpsLimit:getFps());
     strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
@@ -277,7 +276,6 @@ function onDraw(dt)
     strWidth =  DxLib.dx_GetDrawStringWidth(str,#str,false);
     DxLib.dx_DrawString( screenW-strWidth-10 , fontSize+15, str, DxLib.dx_GetColor(0,0,0), -1 );
     DxLib.dx_SetFontSize(fontSize);
-    
     
     str ="テスト"; 
     DxLib.dx_DrawStringToHandle( 10, 35, str, DxLib.dx_GetColor(0,0,0),jpFontHandle, -1,false );
