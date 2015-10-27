@@ -1,4 +1,3 @@
-
 --====================================================================
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
@@ -7,6 +6,9 @@ local bit = require("bit")
 package.path = package.path ..";".."example/?.lua;"
 --====================================================================
 require("fpsLimit")
+require("LoadFont")
+require("MultiByteString")
+require("Rectangle")
 --====================================================================
 ffi.cdef(
 [[
@@ -27,7 +29,7 @@ function init ()
     DxLib.dx_SetAlwaysRunFlag(true)
     DxLib.dx_SetBackgroundColor(255,255,255)
     --================================================================
-    --DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
+    DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
     --================================================================
     DxLib.dx_DxLib_Init();
     --================================================================
@@ -57,22 +59,15 @@ DxLib.dx_GetHitKeyStateAll( newKeyState );
 DxLib.dx_GetHitKeyStateAll( lastKeyState );
 
 -- font
-local fontSize = 15
 local jpFontSize = 23
 local dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
-local jpFontHandle = DxLib.dx_CreateFontToHandle( "Ricty" -- japanese font
-                                                , jpFontSize
-                                                , 0
-                                                , DxLib.DX_FONTTYPE_ANTIALIASING
-                                                , -1
-                                                , 0
-                                                , false
-                                                , false
-                                                )
+local loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
+DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
+local fontSize = 20
+DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING)
 
 -- set CharCode to fontHandle
 DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
-DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,jpFontHandle)
 
 -- for animation 
 local count = 0;
@@ -81,27 +76,50 @@ local lastTime =newTime;
 
 -- fps
 local fpsLimit = createFpsLimit();
+--====================================================================
+
+--rectangle
+local imageNum = 10; --  5 ~ 20 performance slow
+local rectTable = {}
+local targetImage = nil
+
+--====================================================================
+for i=1,imageNum
+do
+    rectTable[i]= createRectangle( screenW/imageNum*(i-1)
+                                 , screenH/2-screenW/imageNum/2+60
+                                 , screenW/imageNum
+                                 , screenW/imageNum):reduced(5,5);
+    if ( i~= 1)                        
+    then
+        rectTable[i]:setParentRect(rectTable[i-1])
+    end 
+end 
+--====================================================================
+local penImage = DxLib.dx_LoadGraph( "resources/pen.png", false );
+local hitTest = createRectangle( 50,80,70,70);
+
 
 --====================================================================
 function drawBackGround(width,height)
     --================================================================
     local num = 20;
-    local rectWidth =width /num;
+    local rectWidth = width /num;
     local rectHeight = height;
     --================================================================
     for i=0,num-1
     do
         DxLib.dx_DrawBox( rectWidth *i
-            ,0
-            ,rectWidth *(i+1)
-            ,rectHeight
-            ,DxLib.dx_GetColor(255 ,255/num *(i+1),255/num)
-            ,true
+                        , 0
+                        , rectWidth *(i+1)
+                        , rectHeight
+                        , DxLib.dx_GetColor( 255
+                                           , 255/num *(i+1)
+                                           , 255/num )
+                        , true
         )
     end
 end
---====================================================================
-
 --====================================================================
 function drawSineCurve(num,dt)
     --================================================================
@@ -111,7 +129,7 @@ function drawSineCurve(num,dt)
         local moveWidth = (screenH/4)
         local x1 = screenW/num * i
         local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 5
+        local r = 4
         local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
         DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
         
@@ -124,65 +142,219 @@ function drawSineCurve(num,dt)
     end 
 end
 --====================================================================
-
+function drawCicle(num,dt,centerX,centerY,width,color)
+    local sineMod = math.abs( math.sin( math.rad(360*dt) ) )
+    local circleWidth = width*sineMod;
+    local circleAngle = 360*dt ;
+    local color_ = color or  DxLib.dx_GetColor(150,0,255)
+    --================================================================
+    for i=0,num
+    do
+        local x1 =  circleWidth * math.sin( math.rad(360/num*i + circleAngle )) +centerX
+        local y1 =  circleWidth * math.cos( math.rad(360/num*i + circleAngle )) +centerY
+        local r = 3*sineMod
+        local c = color_
+        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
+    end 
+end
 --====================================================================
-function onMouseDrag(MouseEvent,mouseX,mouseY)end 
+function drawImage(imageHandle,x,y,zoom,angle)
+    local zoom_ = zoom or 1
+    local angle_ = angle  or 0
+    DxLib.dx_DrawRotaGraph( x --x 
+                          , y --y
+                          , zoom_
+                          , angle_
+                          , imageHandle 
+                          , true     -- TransFlag,  
+                          , false ); -- invert flag (  TurnFlag)
+end 
+--====================================================================
+function drawString(str,x,y,color)
+    local color_ = color or DxLib.dx_GetColor(0,0,0)
+    DxLib.dx_DrawString( x, y, str, color_ , -1 );
+end 
+--====================================================================
+function drawStringToHandle(str,x,y,fontHandle,color)
+    local color_ = color or DxLib.dx_GetColor(0,0,0)
+    DxLib.dx_DrawStringToHandle( x, y, str, color_ ,fontHandle, -1 ,false);
+end 
+--====================================================================
+function getDrawBlendMode()
+    --================================================================
+    local nowBlendMode  = ffi.new("int[1]")
+    local nowBlendModeParam  = ffi.new("int[1]")
+    DxLib.dx_GetDrawBlendMode(nowBlendMode,nowBlendModeParam);
+    --================================================================
+    return nowBlendMode[0],nowBlendModeParam[0]
+end
+--====================================================================
+function getBGMTimeStr(soundHandle)
+    -- 1sec sample num
+    local sampleingRate = DxLib.dx_GetFrequencySoundMem(soundHandle);
+    -- current sample position (playing position)
+    local currentSample = DxLib.dx_GetCurrentPositionSoundMem(soundHandle);
+    --================================================================
+    local allsec = math.floor(currentSample/sampleingRate);
+    local min = math.floor(allsec/60); -- .. hour?
+    local sec = math.mod(allsec,60);
+    local msec = math.mod(currentSample,sampleingRate)/sampleingRate *100
+    --================================================================
+    local timeText =string.format("%i:%i:%i", min ,sec,msec)
+    --================================================================
+    return timeText;
+end
+--====================================================================
+
 --====================================================================
 function onMouseMove(mouseX,mouseY)end 
 --====================================================================
-function onMousePress(MouseEvent,mouseX,mouseY)end
+function onMouseDrag(MouseEvent,mouseX,mouseY)
+    if ( isMousePress == true and targetImage ~= nil )
+    then 
+        local r = targetImage:getMatrixedRect()
+        local tv,sv,av = targetImage:getOffsetVector()
+        
+        -- ??? angle ... ???
+        --============================================================
+        targetImage:setTranslate( mouseX -tv.x -r.width/2  -r.lastPos[1].x 
+                                , mouseY -tv.y -r.height/2 -r.lastPos[1].y  
+                                , 0)
+        --============================================================
+        -- local addX = 0;
+        -- local addY = 0;
+        -- if (lastMouseY ~=mouseY) then if ( lastMouseY > mouseY  ) then addY = -3 else addY = 3 end  end 
+        -- if (lastMouseX ~=mouseX) then if ( lastMouseX > mouseX  ) then addX = -3 else addX = 3 end  end 
+        -- targetImage:setTranslate( targetImage.translateVector.x + addX
+        --                         , targetImage.translateVector.y + addY
+        --                         , 0)
+    end 
+end 
+--====================================================================
+function onMousePress(MouseEvent,mouseX,mouseY)
+    for i,v in ipairs(rectTable)
+    do   
+        local r = v:getMatrixedRect();
+        if ( r:checkColisionPoint (mouseX,mouseY))
+        then 
+            targetImage = v
+            break;
+        else 
+            targetImage =nil
+        end
+    end 
+end
 --====================================================================
 function onMouseRelease(MouseEvent,mouseX,mouseY)end
 --====================================================================
-function onMouseWheel(rotValue) end
+function onMouseWheel(rotValue)end
 --====================================================================
 function onKeyboardPress(KeyEvent)end
 --====================================================================
 function onKeyBoardRelease(KeyEvent)end 
 --====================================================================
-
---====================================================================
 function onUpdate(dt)
     --================================================================
-    count = count+dt/3
+    count = count + (dt/8)
     --================================================================
     if ( count >1.0)
     then
         count =0;
     end 
+    --================================================================
 end 
---====================================================================
-
 --====================================================================
 function onDraw(dt)
     --================================================================
     drawBackGround(screenW,screenH)
-    drawSineCurve(20,count);
+    --================================================================
+    -- circle
+    --================================================================
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ADD , 255 ) ;
+    drawSineCurve(15,count)
+    drawCicle(20,count,0,screenH,100,DxLib.dx_GetColor(100,100,180))
+    drawCicle(20,count,screenW,0,100)
+   
+    --================================================================
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255 ) ;
     --================================================================
     DxLib.dx_SetFontSize(fontSize);
     
     -- Mouse point
     --================================================================
     local str ="Mouse Point :" .. mouseX[0] .. ":" .. mouseY[0];
-    DxLib.dx_DrawString( 10, 10, str, DxLib.dx_GetColor(0,0,0), -1 );
+    strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
+    drawString( str,10, 10);
     
     --================================================================
-    str ="japanese font test"
+    str ="matrix Rect test"
     local strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
-    DxLib.dx_DrawString( screenW-strWidth-10, screenH-20, str, DxLib.dx_GetColor(0,0,0), -1 );
-   
-    -- fps 
+    drawString( str,screenW-strWidth-10, screenH-20);
+    
+    --fps 
     str =string.format("FPS:%.2f",fpsLimit:getFps());
     strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
-    DxLib.dx_DrawString( screenW-strWidth-10, 10, str, DxLib.dx_GetColor(0,0,0), -1 );
+    drawString( str,screenW-strWidth-10, 10 );
+    --================================================================
     
-    str ="テスト"; 
-    DxLib.dx_DrawStringToHandle( 10, 35, str, DxLib.dx_GetColor(0,0,0),jpFontHandle, -1,false );
-    --use dx font
-    DxLib.dx_DrawStringToHandle( 10 , screenH-jpFontSize-10 , "あいうえお" , DxLib.dx_GetColor(0,0,0), dxFontHandle,-1,false) ;
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 150 ) ;
+     
+     -- set angle test 
+    rectTable[5]:setAngle( 0, 0, math.pi*2* count )
+    rectTable[6]:setAngle( 0, 0, math.pi*2* count )
+    rectTable[7]:setAngle( 0, 0, math.pi*2* count )
+       
+    local isHitMouse =false
+    
+    -- draw rect
+    for i,v in ipairs(rectTable)
+    do
+        r = v:getMatrixedRect()
+        DxLib.dx_DrawModiGraphF( r.pos[1].x , r.pos[1].y
+                               , r.pos[2].x , r.pos[2].y
+                               , r.pos[3].x , r.pos[3].y
+                               , r.pos[4].x , r.pos[4].y
+                               , penImage , false );
+        if ( r:checkColisionPoint(mouseX[0],mouseY[0])==true)
+        then
+            isHitMouse =true
+        end 
+    end 
+    
+    hitTest:setAngle( 0, 0, math.pi*2* count )
+    hitTest:setScale( 0.5 + 0.5* math.sin(math.pi*2* count)
+                    , 0.5 + 0.5* math.sin(math.pi*2* count)
+                    , 0 )
+                
+    r = hitTest:getMatrixedRect()
+    
+    DxLib.dx_DrawModiGraphF( r.pos[1].x , r.pos[1].y
+                           , r.pos[2].x , r.pos[2].y
+                           , r.pos[3].x , r.pos[3].y
+                           , r.pos[4].x , r.pos[4].y
+                           , penImage , false );
+    
+    if ( r:checkColisionPoint(mouseX[0],mouseY[0]) == true)
+    then
+        isHitMouse =true ;
+    end 
+    --================================================================
+    if (isHitMouse==true )
+    then 
+        str ="hit mouse "
+        drawString( str,10, screenH -30 );
+    end 
+    
+    -- mouse point circle
+    --================================================================
+    drawCicle(20,count,mouseX[0],mouseY[0],30)
 end
 --====================================================================
-function onExit()end 
+function onExit()
+    --================================================================
+    -- delete font resource
+    loadedFont:destroy();
+end
 --====================================================================
 
 --====================================================================
@@ -290,7 +462,7 @@ do
     fpsLimit:limitFps(60) --test
 end
 --====================================================================
-onExit();
+onExit()
 --====================================================================
-DxLib.dx_DxLib_End()
+DxLib.dx_DxLib_End();
 --====================================================================

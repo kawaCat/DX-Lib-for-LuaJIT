@@ -47,6 +47,8 @@ local newMouseInput = 0;
 local lastMouseInput = 0;
 local newMouseWheel = 0;
 local lastMouseWheel = 0;
+local isMousePress = false
+local isMouseDrag =false
 
 -- font
 DxLib.dx_ChangeFont( "Arial" ,-1) ;
@@ -115,6 +117,12 @@ function drawSineCurve(num,dt)
         --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
     end 
 end
+--====================================================================
+
+--====================================================================
+function onMouseDrag(MouseEvent,mouseX,mouseY)
+    --print ("mouseDrag");
+end 
 --====================================================================
 
 --====================================================================
@@ -262,6 +270,10 @@ end
 --====================================================================
 
 --====================================================================
+function onExit()end 
+--====================================================================
+
+--====================================================================
 -- main loop
 --====================================================================
 while ( DxLib.dx_ProcessMessage() == 0  and
@@ -283,6 +295,10 @@ do
     if (lastMouseX ~=mouseX[0] or lastMouseY ~= mouseY[0] )
     then
         onMouseMove(mouseX[0], mouseY[0]);
+        if (isMousePress == true )
+        then 
+            onMouseDrag(lastMouseInput,mouseX[0], mouseY[0])
+        end 
     end
     lastMouseX = mouseX[0];
     lastMouseY = mouseY[0];
@@ -303,9 +319,11 @@ do
     then
         if ( lastMouseInput < newMouseInput )
         then 
-            onMousePress ( newMouseInput,mouseX,mouseY )
+            onMousePress ( newMouseInput,mouseX[0],mouseY [0])
+            isMousePress = true
         else
-            onMouseRelease ( newMouseInput,mouseX,mouseY )
+            onMouseRelease ( newMouseInput,mouseX[0],mouseY[0] )
+            isMousePress = false
         end
     end
     lastMouseInput = DxLib.dx_GetMouseInput();
@@ -359,6 +377,8 @@ do
     --================================================================
     fpsLimit:limitFps(58)
 end
+--====================================================================
+onExit()
 --====================================================================
 DxLib.dx_DxLib_End()
 --====================================================================

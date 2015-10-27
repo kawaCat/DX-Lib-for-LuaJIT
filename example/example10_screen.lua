@@ -49,6 +49,8 @@ local newMouseInput = 0;
 local lastMouseInput = 0;
 local newMouseWheel = 0;
 local lastMouseWheel = 0;
+local isMousePress = false
+local isMouseDrag =false
 
 -- keyboard
 local newKeyState =ffi.new("char[256]");
@@ -223,6 +225,8 @@ end
 --====================================================================
 
 --====================================================================
+function onMouseDrag(MouseEvent,mouseX,mouseY)end 
+--====================================================================
 function onMouseMove(mouseX,mouseY)end 
 --====================================================================
 function onMousePress(MouseEvent,mouseX,mouseY)
@@ -313,6 +317,7 @@ function onExit()
 end
 --====================================================================
 
+
 --====================================================================
 -- main loop
 --====================================================================
@@ -335,6 +340,10 @@ do
     if (lastMouseX ~=mouseX[0] or lastMouseY ~= mouseY[0] )
     then
         onMouseMove(mouseX[0], mouseY[0]);
+        if (isMousePress == true )
+        then 
+            onMouseDrag(lastMouseInput,mouseX[0], mouseY[0])
+        end 
     end
     lastMouseX = mouseX[0];
     lastMouseY = mouseY[0];
@@ -355,9 +364,11 @@ do
     then
         if ( lastMouseInput < newMouseInput )
         then 
-            onMousePress ( newMouseInput,mouseX,mouseY )
+            onMousePress ( newMouseInput,mouseX[0],mouseY [0])
+            isMousePress = true
         else
-            onMouseRelease ( newMouseInput,mouseX,mouseY )
+            onMouseRelease ( newMouseInput,mouseX[0],mouseY[0] )
+            isMousePress = false
         end
     end
     lastMouseInput = DxLib.dx_GetMouseInput();
@@ -409,7 +420,7 @@ do
     --================================================================
     DxLib.dx_ScreenFlip()
     --================================================================
-    fpsLimit:limitFps(58) --test
+    fpsLimit:limitFps(60) --test
 end
 --====================================================================
 onExit()

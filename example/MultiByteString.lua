@@ -3,7 +3,6 @@
 --==================================================================
 function getMbLengh(multibyteStr)
     --==============================================================
-    local out = ""
     local str= multibyteStr
     local oneStr  =  ""
     local oneStrByte = nil
@@ -33,15 +32,14 @@ function getMbLengh(multibyteStr)
         allStrCount =allStrCount+1
     end
     --==============================================================
-    out = allStrCount
-    --==============================================================
-    return out 
+    return allStrCount 
     --==============================================================
 end
 --==================================================================
 
 --==================================================================
--- multibyte utf string  substring
+-- multibyte utf string substring.
+-- i forgeted this process 
 --==================================================================
 function mbStrSub(multibyteStr,start_,end_)
     --==============================================================
@@ -91,10 +89,10 @@ function mbStrSub(multibyteStr,start_,end_)
     local startPos = start_ or 1 
     local endPos = end_ or allStrCount 
     --==============================================================
-    if ( startPos < 1 )then startPos = 1 end 
-    if ( endPos < startPos ) then endPos =startPos end 
-    if ( startPos > endPos ) then startPos =endPos-1 end 
-    if ( endPos  >  allStrCount ) then endPos =allStrCount end 
+    if ( startPos < 1 ) then startPos = 1 end 
+    if ( endPos < startPos ) then endPos = startPos end 
+    if ( startPos > endPos ) then startPos = endPos-1 end 
+    if ( endPos  >  allStrCount ) then endPos = allStrCount end 
     --==============================================================
     for i=startPos,endPos 
     do 
