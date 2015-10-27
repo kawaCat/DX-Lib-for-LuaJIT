@@ -26,14 +26,13 @@ function createRectangle(x,y,width,height)
     Rectangle.y = y  or 0
     Rectangle.width  = width or 100
     Rectangle.height = height or 100
-    Rectangle.pos = {} -- x,y,z -- pos1[1],pos[2].. -- yet create
+    Rectangle.pos = {}     -- x,y,z -- pos1[1],pos[2].. -- yet create
     Rectangle.lastPos = {} -- x,y,z -- pos1[1],pos[2].. -- yet create
     Rectangle.translateVector = DxLib.dx_VGet(0,0,0); -- x,y,z
     Rectangle.scaleVector     = DxLib.dx_VGet(1,1,1); -- x,y,z
     Rectangle.angleVector     = DxLib.dx_VGet(0,0,0); -- x,y,z
     Rectangle.matrix = nil; -- yet create Matrix
     Rectangle.parentRect = nil; -- if need 
-    Rectangle.lastRect =nil
     --================================================================
     
     ------------------------------------------------------------------
@@ -189,11 +188,11 @@ function createRectangle(x,y,width,height)
         rect.pos[3]  = DxLib.dx_VTransform( self.pos[3], self.matrix ) ;
         rect.pos[4]  = DxLib.dx_VTransform( self.pos[4], self.matrix ) ;
         rect.lastPos = self.lastPos 
-        rect.matrix = self.matrix 
-        rect.x      = rect.pos[1].x
-        rect.y      = rect.pos[2].y
-        rect.width  = rect.pos[3].x-rect.pos[1].x
-        rect.height = rect.pos[4].y-rect.pos[1].y
+        rect.matrix  = self.matrix 
+        rect.x       = rect.pos[1].x
+        rect.y       = rect.pos[2].y
+        rect.width   = rect.pos[3].x-rect.pos[1].x
+        rect.height  = rect.pos[4].y-rect.pos[1].y
         --============================================================
         return rect;
     end 
@@ -225,7 +224,7 @@ function createRectangle(x,y,width,height)
     -- check colision point
     -- @param point
     ------------------------------------------------------------------
-    function Rectangle:checkColisionPoint(xPoint,yPoint)
+    function Rectangle:checkColisionPoint(x,y)
         --============================================================
         local cnt = 0
         --============================================================
@@ -236,8 +235,8 @@ function createRectangle(x,y,width,height)
             if ( i+1 >4 ) then next =1 end 
             local x1 = self.pos[next].x - self.pos[i].x;
             local y1 = self.pos[next].y - self.pos[i].y;
-            local x2 = xPoint - self.pos[i].x;
-            local y2 = yPoint - self.pos[i].y;
+            local x2 = x - self.pos[i].x;
+            local y2 = y - self.pos[i].y;
             --========================================================
             if (x1 * y2 - x2 * y1 < 0) 
             then
@@ -268,7 +267,7 @@ function createRectangle(x,y,width,height)
         do
             local point = targetRect.pos[i]
             local isContact = self:checkColisionPoint(point.x,point.y)
-            if ( isContact ==true )
+            if ( isContact == true )
             then
                 return true
             end

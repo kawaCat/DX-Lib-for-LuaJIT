@@ -82,8 +82,8 @@ local fpsLimit = createFpsLimit();
 local imageNum = 10; --  5 ~ 20 performance slow
 local rectTable = {}
 local targetImage = nil
-
 --====================================================================
+--create rectangle
 for i=1,imageNum
 do
     rectTable[i]= createRectangle( screenW/imageNum*(i-1)
@@ -97,8 +97,7 @@ do
 end 
 --====================================================================
 local penImage = DxLib.dx_LoadGraph( "resources/pen.png", false );
-local hitTest = createRectangle( 50,80,70,70);
-
+local hitTestRect = createRectangle( 50,80,70,70);
 
 --====================================================================
 function drawBackGround(width,height)
@@ -212,22 +211,20 @@ function onMouseMove(mouseX,mouseY)end
 function onMouseDrag(MouseEvent,mouseX,mouseY)
     if ( isMousePress == true and targetImage ~= nil )
     then 
-        local r = targetImage:getMatrixedRect()
-        local tv,sv,av = targetImage:getOffsetVector()
-        
-        -- ??? angle ... ???
-        --============================================================
-        targetImage:setTranslate( mouseX -tv.x -r.width/2  -r.lastPos[1].x 
-                                , mouseY -tv.y -r.height/2 -r.lastPos[1].y  
-                                , 0)
-        --============================================================
-        -- local addX = 0;
-        -- local addY = 0;
-        -- if (lastMouseY ~=mouseY) then if ( lastMouseY > mouseY  ) then addY = -3 else addY = 3 end  end 
-        -- if (lastMouseX ~=mouseX) then if ( lastMouseX > mouseX  ) then addX = -3 else addX = 3 end  end 
-        -- targetImage:setTranslate( targetImage.translateVector.x + addX
-        --                         , targetImage.translateVector.y + addY
+        -- local r = targetImage:getMatrixedRect()
+        -- local tv,sv,av = targetImage:getOffsetVector()
+        -- -- ??? angle ... ???
+        -- --============================================================
+        -- targetImage:setTranslate( rotMouseX -tv.x -r.width/2  -r.lastPos[1].x 
+        --                         , rotMouseY -tv.y -r.height/2 -r.lastPos[1].y  
         --                         , 0)
+        --============================================================
+        local addX = mouseX -lastMouseX;
+        local addY = mouseY -lastMouseY;
+        targetImage:setTranslate( targetImage.translateVector.x + addX
+                                , targetImage.translateVector.y + addY
+                                , 0)
+       
     end 
 end 
 --====================================================================
@@ -298,18 +295,17 @@ function onDraw(dt)
     --================================================================
     
     DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 150 ) ;
-     
-     -- set angle test 
+    local isHitMouse =false
+    
+    -- set angle test 
     rectTable[5]:setAngle( 0, 0, math.pi*2* count )
     rectTable[6]:setAngle( 0, 0, math.pi*2* count )
     rectTable[7]:setAngle( 0, 0, math.pi*2* count )
-       
-    local isHitMouse =false
     
     -- draw rect
     for i,v in ipairs(rectTable)
     do
-        r = v:getMatrixedRect()
+        local r = v:getMatrixedRect() --get applied matrix rect
         DxLib.dx_DrawModiGraphF( r.pos[1].x , r.pos[1].y
                                , r.pos[2].x , r.pos[2].y
                                , r.pos[3].x , r.pos[3].y
@@ -321,13 +317,14 @@ function onDraw(dt)
         end 
     end 
     
-    hitTest:setAngle( 0, 0, math.pi*2* count )
-    hitTest:setScale( 0.5 + 0.5* math.sin(math.pi*2* count)
+    --================================================================
+    hitTestRect:setAngle( 0, 0, math.pi*2* count )
+    hitTestRect:setScale( 0.5 + 0.5* math.sin(math.pi*2* count)
                     , 0.5 + 0.5* math.sin(math.pi*2* count)
                     , 0 )
                 
-    r = hitTest:getMatrixedRect()
-    
+    local r = hitTestRect:getMatrixedRect()
+    --================================================================
     DxLib.dx_DrawModiGraphF( r.pos[1].x , r.pos[1].y
                            , r.pos[2].x , r.pos[2].y
                            , r.pos[3].x , r.pos[3].y
@@ -338,10 +335,12 @@ function onDraw(dt)
     then
         isHitMouse =true ;
     end 
+    
     --================================================================
     if (isHitMouse==true )
     then 
-        str ="hit mouse "
+        DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255 ) ;
+        str ="hit mouse"
         drawString( str,10, screenH -30 );
     end 
     

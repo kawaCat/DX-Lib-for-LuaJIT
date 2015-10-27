@@ -307,6 +307,8 @@ function onDraw(dt)
     -- light off
     DxLib.dx_SetUseLighting( false) ;
    
+   
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 150 ) ;
     --================================================================
     setMMDModelScale( modelHandle,0.5)
     --set position
