@@ -7,6 +7,7 @@ package.path = package.path ..";".."example/?.lua;"
 local App = require("App");
 require("fpsLimit")
 require("LoadFont")
+require("Draw")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -85,112 +86,6 @@ end
 --====================================================================
 
 --====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 20;
-    local rectWidth = width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-                        , 0
-                        , rectWidth *(i+1)
-                        , rectHeight
-                        , DxLib.dx_GetColor( 255
-                                           , 255/num *(i+1)
-                                           , 255/num )
-                        , true
-        )
-    end
-end
---====================================================================
-function drawSineCurve(num,dt)
-    --================================================================
-    for i=0,num
-    do
-        local phase = (360 *dt) -360 /15 *i
-        local moveWidth = (screenH/4)
-        local x1 = screenW/num * i
-        local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 4
-        local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-        
-        phase = phase -180
-        local x2 = screenW/num * i
-        local y2 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        DxLib.dx_DrawCircle(  x2,y2,r,c,1,1);
-        
-        --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
-    end 
-end
---====================================================================
-function drawCicle(num,dt,centerX,centerY,width,color)
-    local sineMod = math.abs( math.sin( math.rad(360*dt) ) )
-    local circleWidth = width*sineMod;
-    local circleAngle = 360*dt ;
-    local color_ = color or  DxLib.dx_GetColor(150,0,255)
-    --================================================================
-    for i=0,num
-    do
-        local x1 =  circleWidth * math.sin( math.rad(360/num*i + circleAngle )) +centerX
-        local y1 =  circleWidth * math.cos( math.rad(360/num*i + circleAngle )) +centerY
-        local r = 3*sineMod
-        local c = color_
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-    end 
-end
---====================================================================
-function drawImage(imageHandle,x,y,zoom,angle)
-    local zoom_ = zoom or 1
-    local angle_ = angle  or 0
-    DxLib.dx_DrawRotaGraph( x --x 
-                          , y --y
-                          , zoom_
-                          , angle_
-                          , imageHandle 
-                          , true     -- TransFlag,  
-                          , false ); -- invert flag (  TurnFlag)
-end 
---====================================================================
-function drawString(str,x,y,color)
-    local color_ = color or DxLib.dx_GetColor(0,0,0)
-    DxLib.dx_DrawString( x, y, str, color_ , -1 );
-end 
---====================================================================
-function drawStringToHandle(str,x,y,fontHandle,color)
-    local color_ = color or DxLib.dx_GetColor(0,0,0)
-    DxLib.dx_DrawStringToHandle( x, y, str, color_ ,fontHandle, -1 ,false);
-end 
---====================================================================
-function getDrawBlendMode()
-    --================================================================
-    local nowBlendMode  = ffi.new("int[1]")
-    local nowBlendModeParam  = ffi.new("int[1]")
-    DxLib.dx_GetDrawBlendMode(nowBlendMode,nowBlendModeParam);
-    --================================================================
-    return nowBlendMode[0],nowBlendModeParam[0]
-end
---====================================================================
-function getBGMTimeStr(soundHandle)
-    -- 1sec sample num
-    local sampleingRate = DxLib.dx_GetFrequencySoundMem(soundHandle);
-    -- current sample position (playing position)
-    local currentSample = DxLib.dx_GetCurrentPositionSoundMem(soundHandle);
-    --================================================================
-    local allsec = math.floor(currentSample/sampleingRate);
-    local min = math.floor(allsec/60); -- .. hour?
-    local sec = math.mod(allsec,60);
-    local msec = math.mod(currentSample,sampleingRate)/sampleingRate *100
-    --================================================================
-    local timeText =string.format("%i:%i:%i", min ,sec,msec)
-    --================================================================
-    return timeText;
-end
---====================================================================
-
---====================================================================
 function App.init ()
     -- init
     DxLib.dx_ChangeWindowMode(true)
@@ -207,7 +102,7 @@ end
 --====================================================================
 function App.prepare()
     
-    --prepared font. ".dft" was created font by DX Lib tools.
+    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 );
     
     -- load and font Resource
@@ -316,7 +211,7 @@ function App.onDraw(dt)
     --================================================================
     DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ADD , 255 ) ;
     --================================================================
-    drawSineCurve(15,count)
+    drawSineCurve(15,count,screenW,screenH)
     drawCicle(20,count,0,screenH,100,DxLib.dx_GetColor(100,100,180))
     drawCicle(20,count,screenW,0,100)
     drawCicle(20,count,App.mouseX,App.mouseY,30)

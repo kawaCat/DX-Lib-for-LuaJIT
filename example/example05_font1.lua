@@ -6,12 +6,11 @@ package.path = package.path ..";".."example/?.lua;"
 --====================================================================
 local App = require("App");
 require("fpsLimit");
+require("Draw")
 --====================================================================
-
 local screenW = 550;
 local screenH = 350;
 --====================================================================
-
 -- font
 local fontSize = 15
 local jpFontSize = 23
@@ -23,49 +22,6 @@ local count = 0;
 
 -- fps
 local fpsLimit = createFpsLimit();
-
---====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 20;
-    local rectWidth =width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-            ,0
-            ,rectWidth *(i+1)
-            ,rectHeight
-            ,DxLib.dx_GetColor(255 ,255/num *(i+1),255/num)
-            ,true
-        )
-    end
-end
---====================================================================
-
---====================================================================
-function drawSineCurve(num,dt)
-    --================================================================
-    for i=0,num
-    do
-        local phase = (360 *dt) -360 /15 *i
-        local moveWidth = (screenH/4)
-        local x1 = screenW/num * i
-        local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 5
-        local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-        
-        phase = phase -180
-        local x2 = screenW/num * i
-        local y2 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        DxLib.dx_DrawCircle(  x2,y2,r,c,1,1);
-        
-        --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
-    end 
-end
---====================================================================
 
 --====================================================================
 function App.init ()
@@ -81,8 +37,6 @@ function App.init ()
     DxLib.dx_DxLib_Init();
     --================================================================
 end
---====================================================================
-
 --====================================================================
 function App.prepare()
     -- after dx_init()'s  setting.
@@ -104,8 +58,6 @@ function App.prepare()
     DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,jpFontHandle)
 end
 --====================================================================
-
---====================================================================
 function App.onUpdate(dt)
     --================================================================
     count = count+dt/3
@@ -116,12 +68,10 @@ function App.onUpdate(dt)
     end 
 end 
 --====================================================================
-
---====================================================================
 function App.onDraw(dt)
     --================================================================
     drawBackGround(screenW,screenH)
-    drawSineCurve(20,count);
+    drawSineCurve(20,count,screenW,screenH);
     --================================================================
     DxLib.dx_SetFontSize(fontSize);
     

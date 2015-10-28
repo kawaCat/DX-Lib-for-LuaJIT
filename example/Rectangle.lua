@@ -27,16 +27,17 @@ function createRectangle(x,y,width,height)
     Rectangle.width  = width or 100
     Rectangle.height = height or 100
     Rectangle.pos = {}     -- x,y,z -- pos1[1],pos[2].. -- yet create
-    Rectangle.lastPos = {} -- x,y,z -- pos1[1],pos[2].. -- yet create
+    Rectangle.lastPos = {} -- 
     Rectangle.translateVector = DxLib.dx_VGet(0,0,0); -- x,y,z
-    Rectangle.scaleVector     = DxLib.dx_VGet(1,1,1); -- x,y,z
-    Rectangle.angleVector     = DxLib.dx_VGet(0,0,0); -- x,y,z
+    Rectangle.scaleVector     = DxLib.dx_VGet(1,1,1); -- xScale,yScale,zScale
+    Rectangle.angleVector     = DxLib.dx_VGet(0,0,0); -- xAngle,yAngle,zAngle
     Rectangle.matrix = nil; -- yet create Matrix
     Rectangle.parentRect = nil; -- if need 
+    Rectangle.optionalMatrix = nil -- if need
     --================================================================
     
     ------------------------------------------------------------------
-    -- set base position.
+    -- set base position.top left position.
     -- @param x1
     -- @param y1
     ------------------------------------------------------------------
@@ -61,8 +62,8 @@ function createRectangle(x,y,width,height)
     
     ------------------------------------------------------------------
     -- set base position and size.
-    -- @param x1
-    -- @param y1
+    -- @param x1 -- top left
+    -- @param y1 -- top left
     -- @param width
     -- @param height
     ------------------------------------------------------------------
@@ -82,7 +83,7 @@ function createRectangle(x,y,width,height)
     -- @param moveZ
     ------------------------------------------------------------------
     function Rectangle:setTranslate(moveX,moveY,moveZ)
-        self.translateVector = DxLib.dx_VGet(moveX,moveY,moveY);
+        self.translateVector = DxLib.dx_VGet(moveX,moveY,moveZ);
     end ;
     --================================================================
     
@@ -99,9 +100,9 @@ function createRectangle(x,y,width,height)
     
     ------------------------------------------------------------------
     -- set matrix rotation.
-    -- @param xAngleRadian
-    -- @param yAngleRadian
-    -- @param zAngleRadian
+    -- @param xRadian
+    -- @param yRadian
+    -- @param zRadian
     ------------------------------------------------------------------
     function Rectangle:setAngle(xRadian,yRadian,zRadian)
         self.angleVector = DxLib.dx_VGet(xRadian,yRadian,zRadian);
@@ -109,15 +110,23 @@ function createRectangle(x,y,width,height)
     --================================================================
     
     ------------------------------------------------------------------
-    -- @param Rectangle  if disable Rectangle , call as Rectangle(arg) is nil 
+    -- @param Rectangle  if disable parent Rectangle , call as Rectangle(in arg) is nil.
     ------------------------------------------------------------------
     function Rectangle:setParentRect(rectangle) self.parentRect = rectangle; end ;
     --================================================================
     
     ------------------------------------------------------------------
-    -- get matrix
+    -- get matrix.
     ------------------------------------------------------------------
     function Rectangle:getMatrix() return self.matrix; end ;
+    --================================================================
+    
+    ------------------------------------------------------------------
+    -- get inverse matrix.
+    ------------------------------------------------------------------
+    function Rectangle:getInverseMatrix()
+        return DxLib.dx_MInverse( self.matrix)
+    end
     --================================================================
     
     ------------------------------------------------------------------
@@ -163,7 +172,7 @@ function createRectangle(x,y,width,height)
         --============================================================
         -- set origin pos (base position) 
         local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
-        self.matrix = baseMat ;
+        self.matrix = baseMat;
         self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetScale( self.scaleVector   ));
         self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotX ( self.angleVector.x ));
         self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotY ( self.angleVector.y ));
@@ -178,6 +187,12 @@ function createRectangle(x,y,width,height)
         then 
             -- apply parent Rect matrix
             self.matrix = self:_MulMatrix( self.matrix, self.parentRect:getMatrix() ) ;
+        end 
+        --============================================================
+        if ( self.optionalMatrix ~= nil)
+        then 
+            -- apply optional matrix
+            self.matrix = self:_MulMatrix( self.matrix, self.optionalMatrix ) ;
         end 
         --============================================================
         self.lastPos = self.pos
@@ -199,7 +214,7 @@ function createRectangle(x,y,width,height)
     --================================================================
     
     ------------------------------------------------------------------
-    -- get allParent translate,angle,scale vector Sum
+    -- get allParent "translate,angle,scale" Sum vector 
     ------------------------------------------------------------------
     function Rectangle:getOffsetVector()
         --============================================================
@@ -220,6 +235,41 @@ function createRectangle(x,y,width,height)
     end 
     --================================================================
    
+    ------------------------------------------------------------------
+    -- get applied "angle,Scale" Matrix. origin pos is this rect centor.
+    ------------------------------------------------------------------
+    function Rectangle:getAngleScaleMat()
+        --============================================================
+        local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
+        local mt =  baseMat;
+        mt = self:_MulMatrix( mt, DxLib.dx_MGetScale( self.scaleVector   ));
+        mt = self:_MulMatrix( mt, DxLib.dx_MGetRotX ( self.angleVector.x ));
+        mt = self:_MulMatrix( mt, DxLib.dx_MGetRotY ( self.angleVector.y ));
+        mt = self:_MulMatrix( mt, DxLib.dx_MGetRotZ ( self.angleVector.z ));
+        mt = self:_MulMatrix( mt, DxLib.dx_MInverse ( baseMat ));
+        --============================================================
+        if (self.parentRect ~= nil )
+        then 
+            self.matrix = self:_MulMatrix( self.matrix, self.parentRect:getMatrix() ) ;
+        end 
+        --============================================================
+        if ( self.optionalMatrix ~= nil)
+        then 
+            self.matrix = self:_MulMatrix( self.matrix, self.optionalMatrix ) ;
+        end 
+        --============================================================
+        return mt;
+    end
+    --================================================================
+    
+    ------------------------------------------------------------------
+    -- get applied "angle,Scale" Inverse Matrix. origin pos is this rect centor.
+    ------------------------------------------------------------------
+    function Rectangle:getInverseAngleScaleMat()
+        return DxLib.dx_MInverse( self:getAngleScaleMat())
+    end 
+    --================================================================
+    
     ------------------------------------------------------------------
     -- check colision point
     -- @param point
@@ -285,6 +335,7 @@ function createRectangle(x,y,width,height)
     function Rectangle:_MulMatrix(In1,In2)
         --============================================================
         local mat = DxLib.dx_MGetIdent() ;
+        --local mat =DxLib.dx_MGetTranslate( DxLib.dx_VGet(0,0,0))
         --============================================================
         mat.m[0][0] = In1.m[0][0] * In2.m[0][0] + In1.m[0][1] * In2.m[1][0] 
                     + In1.m[0][2] * In2.m[2][0] + In1.m[0][3] * In2.m[3][0];

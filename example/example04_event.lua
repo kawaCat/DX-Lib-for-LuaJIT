@@ -6,8 +6,8 @@ package.path = package.path ..";".."example/?.lua;"
 --====================================================================
 local App = require("App");
 require("fpsLimit");
+require("Draw")
 --====================================================================
-
 local screenW = 550;
 local screenH = 350;
 
@@ -35,58 +35,17 @@ function App.init ()
     --================================================================
 end
 --====================================================================
-
---====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 20;
-    local rectWidth =width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-            ,0
-            ,rectWidth *(i+1)
-            ,rectHeight
-            ,DxLib.dx_GetColor(255/num *(i+1),255/num *(i+1),255)
-            ,true
-        )
-    end
-end
---====================================================================
-
---====================================================================
-function drawSineCurve(num,dt)
-    --================================================================
-    for i=0,num
-    do
-        local phase = (360 *dt) -360 /15 *i
-        local moveWidth = (screenH/4)
-        local x1 = screenW/num * i
-        local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 5
-        local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-        
-        phase = phase -180
-        local x2 = screenW/num * i
-        local y2 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        DxLib.dx_DrawCircle(  x2,y2,r,c,1,1);
-        
-        --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
-    end
-end 
---====================================================================
-
---====================================================================
 function App.prepare()
     -- after dx_init()'s  setting.
     DxLib.dx_ChangeFont( "Arial" ,-1) ;
     DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING)
 end
 --====================================================================
-
+function App.onMouseMove(mouseX,mouseY)end 
+function App.onMousePress(MouseEvent,mouseX,mouseY)end
+function App.onMouseDrag(MouseEvent,mouseX,mouseY) end 
+function App.onMouseRelease(MouseEvent,mouseX,mouseY)end
+function App.onMouseWheel(rotValue)end
 --====================================================================
 function App.onKeyboardPress(KeyEvent)
     --================================================================
@@ -97,10 +56,9 @@ function App.onKeyboardPress(KeyEvent)
     -- end 
 end
 --====================================================================
-
+function App.onKeyBoardRelease(KeyEvent)end 
 --====================================================================
 function App.onUpdate(dt)
-    --================================================================
     count = count+dt/3
     --================================================================
     if ( count >1.0)
@@ -109,12 +67,9 @@ function App.onUpdate(dt)
     end 
 end 
 --====================================================================
-
---====================================================================
 function App.onDraw(dt)
-    
     drawBackGround(screenW,screenH)
-    drawSineCurve(20,count);
+    drawSineCurve(20,count,screenW,screenH);
     --================================================================
     DxLib.dx_SetFontSize(fontSize);
     
@@ -170,6 +125,8 @@ function App.onDraw(dt)
     strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
     DxLib.dx_DrawString( screenW-strWidth-10, 10, str, DxLib.dx_GetColor(0,0,0), -1 );
 end
+--====================================================================
+function App.onExit()end 
 --====================================================================
 
 --====================================================================

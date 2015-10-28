@@ -5,8 +5,9 @@ local DxLib = require("DxLib_ffi");
 package.path = package.path ..";".."example/?.lua;"
 --====================================================================
 local App = require("App");
-require("LoadFont")
+require("LoadFont");
 require("fpsLimit");
+require("Draw")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -35,86 +36,6 @@ local invertGraph = nil
 local isBlendMode_Sub =false;
 
 --====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 20;
-    local rectWidth = width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-                        , 0
-                        , rectWidth *(i+1)
-                        , rectHeight
-                        , DxLib.dx_GetColor( 255/num 
-                                           , 200/num *(i+1)+55
-                                           , 255)
-                        , true
-                        )
-    end
-end
---====================================================================
-function drawSineCurve(num,dt)
-    --================================================================
-    for i=0,num
-    do
-        local phase = (360 *dt) -360 /15 *i
-        local moveWidth = (screenH/4)
-        local x1 = screenW/num * i
-        local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 4
-        local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-        
-        phase = phase -180
-        local x2 = screenW/num * i
-        local y2 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        DxLib.dx_DrawCircle(  x2,y2,r,c,1,1);
-        
-        --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
-    end 
-end
---====================================================================
-function drawCicle(num,dt,centerX,centerY,width,color)
-    local sineMod = math.abs( math.sin( math.rad(360*dt) ) )
-    local circleWidth = width*sineMod;
-    local circleAngle = 360*dt ;
-    local color_ = color or  DxLib.dx_GetColor(150,0,255)
-    --================================================================
-    for i=0,num
-    do
-        local x1 =  circleWidth * math.sin( math.rad(360/num*i + circleAngle )) +centerX
-        local y1 =  circleWidth * math.cos( math.rad(360/num*i + circleAngle )) +centerY
-        local r = 3*sineMod
-        local c = color_
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-    end 
-end
---====================================================================
-function drawImage(imageHandle,x,y,zoom,angle)
-    local zoom_ = zoom or 1
-    local angle_ = angle  or 0
-    DxLib.dx_DrawRotaGraph( x --x 
-                          , y --y
-                          , zoom_
-                          , angle_
-                          , imageHandle 
-                          , true     -- TransFlag,  
-                          , false ); -- invert flag (  TurnFlag)
-end 
---====================================================================
-function getDrawBlendMode()
-    --================================================================
-    local nowBlendMode  = ffi.new("int[1]")
-    local nowBlendModeParam  = ffi.new("int[1]")
-    DxLib.dx_GetDrawBlendMode(nowBlendMode,nowBlendModeParam);
-    --================================================================
-    return nowBlendMode[0],nowBlendModeParam[0]
-end
---====================================================================
-
---====================================================================
 function App.init ()
     -- init
     DxLib.dx_ChangeWindowMode(true)
@@ -128,8 +49,6 @@ function App.init ()
     DxLib.dx_DxLib_Init();
     --================================================================
 end
---====================================================================
-
 --====================================================================
 function App.prepare()
     -- after dx_init()'s  setting.
@@ -171,8 +90,6 @@ function App.prepare()
     table.insert (imageHandleTable,invertGraph )
 end
 --====================================================================
-
---====================================================================
 function App.onMousePress(MouseEvent,mouseX,mouseY)
     if ( isBlendMode_Sub ==true )
     then
@@ -181,8 +98,6 @@ function App.onMousePress(MouseEvent,mouseX,mouseY)
         isBlendMode_Sub =true;
     end
 end
---====================================================================
-
 --====================================================================
 function App.onUpdate(dt)
     count = count+dt/3
@@ -193,12 +108,10 @@ function App.onUpdate(dt)
     end 
 end 
 --====================================================================
-
---====================================================================
 function App.onDraw(dt)
     --================================================================
-    drawBackGround(screenW,screenH)
-    --drawSineCurve(20,count);
+    drawBackGround(screenW,screenH,2)
+    --drawSineCurve(20,count,screenW,screenH);
     --================================================================
     
     -- change blendmode
@@ -265,8 +178,6 @@ function App.onDraw(dt)
     --================================================================
     fpsLimit:limitFps(60);
 end
---====================================================================
-
 --====================================================================
 function App.onExit()
     --================================================================

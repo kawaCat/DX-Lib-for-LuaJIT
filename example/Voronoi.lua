@@ -45,7 +45,6 @@ local rand = math.random;
 --@factory Voronoi
 
 ----------------------------------------------------------------------
--- [#] function desc
 -- @param width
 -- @param height
 -- @constructor
@@ -92,7 +91,6 @@ function createVoronoi(width,height)
         --============================================================
         local points =self.points;
         --============================================================
-        -- strategy パターン
         local distanceFunc = self._euclideanDist;
         --local distanceFunc = self._manhattanDist;
         --local distanceFunc = self._chebyshevDist;
@@ -139,10 +137,10 @@ function createVoronoi(width,height)
     function Voronoi:_euclideanDist( x,  y,  a,  b) 
         --============================================================
         local horizDistance = abs(x - a);
-        local  vertDistance = abs(y - b);
+        local vertDistance  = abs(y - b);
         --============================================================
-        local  dist =   sqrt(pow(horizDistance, 2) 
-                      + pow(vertDistance, 2));
+        local dist =  sqrt(pow(horizDistance, 2) 
+                    + pow(vertDistance, 2));
         --============================================================
         return dist;
     end 
@@ -501,5 +499,3 @@ function createColor_Thief()
     return color
 end 
 --====================================================================
-
-

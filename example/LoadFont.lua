@@ -9,9 +9,9 @@ local ffi = require("ffi")
 ffi.cdef
 [[
     typedef const char* LPCSTR;
-    typedef unsigned long       DWORD;
-    typedef void*       PVOID;
-    typedef int                 BOOL;
+    typedef unsigned long DWORD;
+    typedef void* PVOID;
+    typedef int BOOL;
     int  AddFontResourceExA(  LPCSTR name,  DWORD fl,  PVOID res);
     BOOL RemoveFontResourceExA(  LPCSTR name,  DWORD fl,  PVOID pdv);
 ]]

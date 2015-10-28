@@ -1,15 +1,21 @@
-
 --====================================================================
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
-local bit = require("bit")
 --====================================================================
-
+package.path = package.path ..";".."example/?.lua;"
+--====================================================================
+local App = require("App")
+require("Draw")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
 --====================================================================
-function init ()
+
+-- font
+local fontSize = 20
+
+--====================================================================
+function App.init ()
     -- init
     DxLib.dx_ChangeWindowMode(true)
     DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ;
@@ -28,51 +34,25 @@ function init ()
     DxLib.dx_SetWriteZBuffer3D( true ) ;
 end
 --====================================================================
--- init ,setup Dx Library
-init ();
---====================================================================
+function App.prepare()
+    DxLib.dx_ChangeFont( "Arial" ,-1) ;
+    DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) 
+    
+    -- image
+    graphicHandle = DxLib.dx_LoadGraph( "resources/hatsuneMiku.png", false );
 
--- for store mouse point
-local mouseX = ffi.new("int[1]");
-local mouseY = ffi.new("int[1]");
-local lastMouseInput = 0;
-
--- font
-DxLib.dx_ChangeFont( "Arial" ,-1) ;
-DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING)
-local fontSize = 20
-
---====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 10;
-    local rectWidth =width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-                         ,0
-                         ,rectWidth *(i+1)
-                         ,rectHeight
-                         ,DxLib.dx_GetColor(255/num *(i+1),255/num *(i+1),255)
-                         ,true
-                        )
-    end
+    -- sound
+    soundHandle = DxLib.dx_LoadSoundMem( "resources/button.ogg" ,3,-1)
+    playingSoundTable = {}
+    lastPlayTime = 0;
 end
 --====================================================================
-
--- main loop
+function App.onUpdate(dt)end 
 --====================================================================
-while ( DxLib.dx_ProcessMessage() == 0  and
-        DxLib.dx_CheckHitKey( DxLib.KEY_INPUT_ESCAPE ) == 0 )
-do
-    DxLib.dx_SetDrawScreen( DxLib.DX_SCREEN_BACK )
-    DxLib.dx_ClearDrawScreen(nil)
-    --================================================================
-    DxLib.dx_SetDrawBlendMode(DxLib.DX_BLENDMODE_ALPHA,255)
-    --================================================================
-    drawBackGround(screenW,screenH)
+function App.onDraw(dt)
+    
+    -- background
+    drawBackGround(screenW,screenH,2)
     --================================================================
 
     --================================================================
@@ -92,7 +72,7 @@ do
 
     --draw sphire
     DxLib.dx_DrawSphere3D( DxLib.dx_VGet( 0, -0.5, 5 )  -- position
-                         , 2 + 1 * ( mouseX[0]/screenW )-- radius
+                         , 2 + 1 * ( App.mouseX/screenW )-- radius
                          , 20 --divnum
                          , DxLib.dx_GetColor( 255,255,255 )
                          , DxLib.dx_GetColor( 0, 0, 0 )
@@ -100,18 +80,14 @@ do
     --================================================================
 
     -- Mouse Point
-    DxLib.dx_GetMousePoint(mouseX,mouseY);
     DxLib.dx_SetFontSize(fontSize);
-    local str ="MousePoint :" .. mouseX[0] .. ":" .. mouseY[0];
+    local str ="MousePoint :" .. App.mouseX .. ":" .. App.mouseY;
     DxLib.dx_DrawString( 10, 10, str, DxLib.dx_GetColor(0,0,0), -1 );
     --================================================================
 
     -- Mouse Input
-    if (    lastMouseInput ~= DxLib.dx_GetMouseInput()
-        and bit.band(DxLib.dx_GetMouseInput(),DxLib.MOUSE_INPUT_LEFT) ~= 0
-        )
+    if (App.isMousePress == true)
     then
-        DxLib.dx_SetFontSize(fontSize);
         str ="Mouse Input "
         DxLib.dx_DrawString( 10, 10 + fontSize, str, DxLib.dx_GetColor(0,0,0), -1 );
     end
@@ -120,9 +96,12 @@ do
     --================================================================
     -- store last mouse point
     lastMouseInput = DxLib.dx_GetMouseInput();
-    --================================================================
-    DxLib.dx_ScreenFlip()
+
 end
 --====================================================================
-DxLib.dx_DxLib_End()
+function App.onExit()end
+--====================================================================
+
+--====================================================================
+App.run()
 --====================================================================

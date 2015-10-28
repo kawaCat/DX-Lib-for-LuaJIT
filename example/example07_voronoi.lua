@@ -22,6 +22,7 @@ local App = require("App");
 require("LoadFont")
 require("fpsLimit");
 require("Voronoi")
+require("Draw")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -45,65 +46,6 @@ local outFile = "test.png" --save image file path
 local voronoiW =400;
 local voronoiH =200;
 local voronoiImage = nil -- create in App.prepare().
-
---====================================================================
-function drawBackGround(width,height)
-    --================================================================
-    local num = 20;
-    local rectWidth = width /num;
-    local rectHeight = height;
-    --================================================================
-    for i=0,num-1
-    do
-        DxLib.dx_DrawBox( rectWidth *i
-                        , 0
-                        , rectWidth *(i+1)
-                        , rectHeight
-                        , DxLib.dx_GetColor( 255/num 
-                                           , 200/num *(i+1)+55
-                                           , 255)
-                        , true
-        )
-    end
-end
---====================================================================
-function drawSineCurve(num,dt)
-    --================================================================
-    for i=0,num
-    do
-        local phase = (360 *dt) -360 /15 *i
-        local moveWidth = (screenH/4)
-        local x1 = screenW/num * i
-        local y1 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        local r = 4
-        local c = DxLib.dx_GetColor(150,0,255), true -- color,fillflag
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-        
-        phase = phase -180
-        local x2 = screenW/num * i
-        local y2 = screenH /2 + moveWidth*(math.sin(math.rad(phase)) )
-        DxLib.dx_DrawCircle(  x2,y2,r,c,1,1);
-        
-        --DxLib.dx_DrawLine  (  x1,y1,x2,y2,c,1);
-    end 
-end
---====================================================================
-function drawCicle(num,dt,centerX,centerY,width,color)
-    local sineMod = math.abs( math.sin( math.rad(360*dt) ) )
-    local circleWidth = width*sineMod;
-    local circleAngle = 360*dt ;
-    local color_ = color or  DxLib.dx_GetColor(150,0,255)
-    --================================================================
-    for i=0,num
-    do
-        local x1 =  circleWidth * math.sin( math.rad(360/num*i + circleAngle )) +centerX
-        local y1 =  circleWidth * math.cos( math.rad(360/num*i + circleAngle )) +centerY
-        local r = 3*sineMod
-        local c = color_
-        DxLib.dx_DrawCircle(  x1,y1,r,c,1,1);
-    end 
-end
---====================================================================
 
 --====================================================================
 function createVoronoiImage(w,h)
@@ -164,10 +106,7 @@ function App.init ()
     --================================================================
 end
 --====================================================================
-
---====================================================================
 function App.prepare()
-    -- after dx_init()'s  setting.
     
     -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
@@ -179,7 +118,8 @@ function App.prepare()
                                               , 0
                                               , false
                                               , false
-                                              )
+                                          )
+                                          
     -- load and font Resource
     -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
@@ -195,8 +135,6 @@ function App.prepare()
     voronoiImage = createVoronoiImage(voronoiW,voronoiH);
 end
 --====================================================================
-
---====================================================================
 function App.onUpdate(dt)
     --================================================================
     count = count+dt/3
@@ -207,11 +145,9 @@ function App.onUpdate(dt)
     end 
 end 
 --====================================================================
-
---====================================================================
 function App.onDraw(dt)
     --================================================================
-    drawBackGround(screenW,screenH)
+    drawBackGround(screenW,screenH,2)
     --================================================================
     
     -- draw voronoi image frame line
@@ -259,8 +195,6 @@ function App.onDraw(dt)
     --================================================================
     fpsLimit:limitFps(60)
 end
---====================================================================
-
 --====================================================================
 function App.onExit()
     -- save To png file
