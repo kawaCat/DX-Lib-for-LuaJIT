@@ -135,6 +135,27 @@ function drawStringToHandle(str,x,y,fontHandle,color)
 end 
 --====================================================================
 
+-- create idle text image;
+--====================================================================
+function createTextImage(str,fontSize_)
+    
+    DxLib.dx_SetFontSize(fontSize_);
+    textWidth = DxLib.dx_GetDrawStringWidth(str,#str,false)
+    --================================================================
+    local textImage = DxLib.dx_MakeScreen( textWidth
+                                         , fontSize_
+                                         , true ) ;    
+    --================================================================
+    DxLib.dx_SetDrawScreen( textImage )
+    DxLib.dx_DrawString( 0, 0 ,str,DxLib.dx_GetColor(0,0,0),-1);
+    --================================================================
+    DxLib.dx_SetDrawScreen( DxLib.DX_SCREEN_BACK );
+    --================================================================
+    return  textImage;
+end 
+--====================================================================
+
+
 --====================================================================
 function getDrawBlendMode()
     --================================================================
