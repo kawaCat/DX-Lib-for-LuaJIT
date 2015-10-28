@@ -1,93 +1,50 @@
 --====================================================================
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
-local bit = require("bit")
 --====================================================================
 package.path = package.path ..";".."example/?.lua;"
 --====================================================================
+local App = require("App");
 require("fpsLimit")
 require("LoadFont")
-require("MultiByteString")
---====================================================================
-ffi.cdef(
-[[
-    int strcmp (const char *string1, const char *string2);
-    char * strcpy ( char * destination, const char * source ) ; 
-    int printf(const char *fmt, ...);
-    int memcmp(const void *buf1, const void *buf2,size_t n);
-]] )
 --====================================================================
 local screenW = 550;
 local screenH = 350;
 --====================================================================
-function init ()
-    -- init
-    DxLib.dx_ChangeWindowMode(true)
-    DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ;
-    DxLib.dx_SetOutApplicationLogValidFlag(false)
-    DxLib.dx_SetAlwaysRunFlag(true)
-    DxLib.dx_SetBackgroundColor(255,255,255)
-    --================================================================
-    DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
-    --================================================================
-    DxLib.dx_DxLib_Init();
-    --================================================================
-end
---====================================================================
--- init ,setup Dx Library
-init ();
---====================================================================
-
--- for store mouse point
-local mouseX = ffi.new("int[1]");
-local mouseY = ffi.new("int[1]");
-DxLib.dx_GetMousePoint(mouseX,mouseY);
-local lastMouseX = mouseX[0];
-local lastMouseY = mouseY[0];
-local newMouseInput = 0;
-local lastMouseInput = 0;
-local newMouseWheel = 0;
-local lastMouseWheel = 0;
-local isMousePress = false
-local isMouseDrag =false
-
--- keyboard
-local newKeyState =ffi.new("char[256]");
-local lastKeyState =ffi.new("char[256]");
-DxLib.dx_GetHitKeyStateAll( newKeyState );
-DxLib.dx_GetHitKeyStateAll( lastKeyState );
 
 -- font
 local jpFontSize = 23
-local dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
-local loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
-DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
+local dxFontHandle = nil -- create App.preapre()
+local loadedFont = nil   -- load and font Resource
 local fontSize = 20
-DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING)
-
--- set CharCode to fontHandle
-DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
 
 -- for animation 
 local count = 0;
-local newTime =DxLib.dx_GetNowCount(false);
-local lastTime =newTime;
 
 -- fps
 local fpsLimit = createFpsLimit();
 --====================================================================
 
 -- mmd model
-local modelHandle = DxLib.dx_MV1LoadModel("resources/mmd_kinako/kinako.mv1" );
-local attachAnimIndex = DxLib.dx_MV1AttachAnim( modelHandle, 11, -1, false ) 
+local modelHandle = nil -- create in prepare()
+local attachAnimIndex = nil
 local animationTime =0;
-local totalAnimTime = DxLib.dx_MV1GetAttachAnimTotalTime( modelHandle, attachAnimIndex ) ;
+local totalAnimTime = nil
 local animSpeed = 0.28
 local isAnimationStart =false;
 
+-- BGM
+local soundHandle = nil;
+
+-- idel text Image
+local idleTextImage = nil;
+
+--cameraPos
+local cameraAnimCount = 0;
+
 -- in mmd Model scaling OutLine DotWidth fix.
 --====================================================================
-function setMMDModelScale (pmdModel,newScale)
+function setMMDModelScale(pmdModel,newScale)
     --================================================================
     DxLib.dx_MV1SetScale(  pmdModel
                          , DxLib.dx_VGet( newScale,
@@ -109,13 +66,8 @@ function setMMDModelScale (pmdModel,newScale)
 end 
 --====================================================================
 
--- BGM
--- streaming load
-DxLib.dx_SetCreateSoundDataType( DxLib.DX_SOUNDDATATYPE_FILE) 
-local soundHandle = DxLib.dx_LoadSoundMem( "resources/underGround.ogg" ,3,-1)
-
 -- create idle text image;
---====================================================================-- 
+--====================================================================
 function createTextImage(str,width_,fontSize_)
     DxLib.dx_SetFontSize(fontSize_);
     --================================================================
@@ -131,13 +83,6 @@ function createTextImage(str,width_,fontSize_)
     return  playMusicTextScreen;
 end 
 --====================================================================
-DxLib.dx_SetFontSize(fontSize);
-local str="Click Play Music"
-local textImageWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
-local idleTextImage = createTextImage(str,textImageWidth,fontSize);
-
---cameraPos
-local cameraAnimCount = 0;
 
 --====================================================================
 function drawBackGround(width,height)
@@ -246,11 +191,57 @@ end
 --====================================================================
 
 --====================================================================
-function onMouseDrag(MouseEvent,mouseX,mouseY)end 
+function App.init ()
+    -- init
+    DxLib.dx_ChangeWindowMode(true)
+    DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ;
+    DxLib.dx_SetOutApplicationLogValidFlag(false)
+    DxLib.dx_SetAlwaysRunFlag(true)
+    DxLib.dx_SetBackgroundColor(255,255,255)
+    --================================================================
+    DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
+    --================================================================
+    DxLib.dx_DxLib_Init();
+    --================================================================
+end
 --====================================================================
-function onMouseMove(mouseX,mouseY)end 
+function App.prepare()
+    
+    --prepared font. ".dft" was created font by DX Lib tools.
+    dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 );
+    
+    -- load and font Resource
+    -- need call  loadedFont:destory()  at app exit .
+    loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
+    DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
+    fontSize = 20
+    DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) --draw font type.
+
+    -- set CharCode to fontHandle
+    DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
+    --================================================================
+    
+    -- mmd model
+    modelHandle = DxLib.dx_MV1LoadModel("resources/mmd_kinako/kinako.mv1" );
+    attachAnimIndex = DxLib.dx_MV1AttachAnim( modelHandle, 11, -1, false ) 
+    animationTime =0;
+    totalAnimTime = DxLib.dx_MV1GetAttachAnimTotalTime( modelHandle, attachAnimIndex ) ;
+    animSpeed = 0.28
+    isAnimationStart =false;
+
+    -- BGM
+    -- streaming load
+    DxLib.dx_SetCreateSoundDataType( DxLib.DX_SOUNDDATATYPE_FILE) 
+    soundHandle = DxLib.dx_LoadSoundMem( "resources/underGround.ogg" ,3,-1)
+    
+    -- create idle text image 
+    DxLib.dx_SetFontSize(fontSize);
+    local str="Click Play Music"
+    local textImageWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
+    idleTextImage = createTextImage(str,textImageWidth,fontSize);
+end
 --====================================================================
-function onMousePress(MouseEvent,mouseX,mouseY)
+function App.onMousePress(MouseEvent,mouseX,mouseY)
     if ( isAnimationStart ==true)
     then
         isAnimationStart =false
@@ -263,15 +254,7 @@ function onMousePress(MouseEvent,mouseX,mouseY)
     end 
 end
 --====================================================================
-function onMouseRelease(MouseEvent,mouseX,mouseY)end
---====================================================================
-function onMouseWheel(rotValue)end
---====================================================================
-function onKeyboardPress(KeyEvent)end
---====================================================================
-function onKeyBoardRelease(KeyEvent)end 
---====================================================================
-function onUpdate(dt)
+function App.onUpdate(dt)
     --================================================================
     count = count + (dt/3.5)
     --================================================================
@@ -287,16 +270,16 @@ function onUpdate(dt)
     end 
 end 
 --====================================================================
-function onDraw(dt)
+function App.onDraw(dt)
     --================================================================
     drawBackGround(screenW,screenH)
     --================================================================
     -- 3d
     -- position 
     local modelPosition  = DxLib.dx_VGet( 0, 0, 15)
-    local cameraPosition = DxLib.dx_VGet( 0   +math.cos(math.pi*2*cameraAnimCount)*10
+    local cameraPosition = DxLib.dx_VGet( 0  + math.cos(math.pi*2*cameraAnimCount)*10
                                         , 5.5 
-                                        , 0   +math.sin(math.pi*2*cameraAnimCount)*10)
+                                        , 0  + math.sin(math.pi*2*cameraAnimCount)*10)
     local cameraTargetPositon = DxLib.dx_VGet( 0, 5, 5)
    
     -- camera
@@ -336,7 +319,7 @@ function onDraw(dt)
     drawSineCurve(15,count)
     drawCicle(20,count,0,screenH,100,DxLib.dx_GetColor(100,100,180))
     drawCicle(20,count,screenW,0,100)
-    drawCicle(20,count,mouseX[0],mouseY[0],30)
+    drawCicle(20,count,App.mouseX,App.mouseY,30)
     --================================================================
     DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255 ) ;
     --================================================================
@@ -344,7 +327,7 @@ function onDraw(dt)
     
     -- Mouse point
     --================================================================
-    local str ="Mouse Point :" .. mouseX[0] .. ":" .. mouseY[0];
+    local str ="Mouse Point :" .. App.mouseX .. ":" .. App.mouseY;
     strWidth = DxLib.dx_GetDrawStringWidth(str,#str,false);
     drawString( str,10, 10);
     
@@ -368,9 +351,13 @@ function onDraw(dt)
     -- music time
     drawString( getBGMTimeStr(soundHandle),10, screenH-fontSize-10);
     --================================================================
+    
+    -- fps
+    --================================================================
+    fpsLimit:limitFps(60)
 end
 --====================================================================
-function onExit()
+function App.onExit()
     --================================================================
     DxLib.dx_MV1DeleteModel( modelHandle ) 
     --================================================================
@@ -379,113 +366,6 @@ function onExit()
 end
 --====================================================================
 
-
 --====================================================================
--- main loop
---====================================================================
-while ( DxLib.dx_ProcessMessage() == 0  and
-        DxLib.dx_CheckHitKey( DxLib.KEY_INPUT_ESCAPE ) == 0 )
-do
-    -- update process Time;
-    newTime =DxLib.dx_GetNowCount(false);
-    
-    -- prepare
-    --================================================================
-    DxLib.dx_SetDrawScreen( DxLib.DX_SCREEN_BACK )
-    DxLib.dx_ClearDrawScreen(nil)
-    --================================================================
-    DxLib.dx_SetDrawBlendMode(DxLib.DX_BLENDMODE_ALPHA,255)
-    --================================================================
-    
-    -- Mouse Point
-    DxLib.dx_GetMousePoint(mouseX,mouseY);
-    if (lastMouseX ~=mouseX[0] or lastMouseY ~= mouseY[0] )
-    then
-        onMouseMove(mouseX[0], mouseY[0]);
-        if (isMousePress == true )
-        then 
-            onMouseDrag(lastMouseInput,mouseX[0], mouseY[0])
-        end 
-    end
-    lastMouseX = mouseX[0];
-    lastMouseY = mouseY[0];
-    --================================================================
-    
-    -- mouse wheel
-    newMouseWheel = DxLib.dx_GetMouseWheelRotVol(true)
-    if ( lastMouseWheel ~= newMouseWheel )
-    then 
-        onMouseWheel ( newMouseWheel );
-    end
-    lastMouseWheel = newMouseWheel;
-    --================================================================
-    
-    -- Mouse Input
-    newMouseInput = DxLib.dx_GetMouseInput();
-    if ( lastMouseInput ~= newMouseInput )
-    then
-        if ( lastMouseInput < newMouseInput )
-        then 
-            onMousePress ( newMouseInput,mouseX[0],mouseY [0])
-            isMousePress = true
-        else
-            onMouseRelease ( newMouseInput,mouseX[0],mouseY[0] )
-            isMousePress = false
-        end
-    end
-    lastMouseInput = DxLib.dx_GetMouseInput();
-    --================================================================
-
-    -- keyboard
-    DxLib.dx_GetHitKeyStateAll( newKeyState ) ;
-    --================================================================
-    --if ( ffi.C.strcmp (lastKeyState,newKeyState) ~= 0)
-    if ( ffi.C.memcmp (lastKeyState,newKeyState,256) ~= 0)
-    then 
-        --============================================================
-        local lastSum = 0;
-        local newSum =0;
-        for i=0,256-1
-        do
-            lastSum = lastSum + lastKeyState[i]
-            newSum  = newSum + newKeyState[i]
-            --========================================================
-            -- check max keyboard press num.
-            if (lastSum > 4 )
-            then 
-                break;
-            end
-        end
-        --============================================================
-        -- newSum is keyPressed num.
-        if (lastSum  < newSum )
-        then
-            onKeyboardPress(newKeyState);
-        else
-            onKeyBoardRelease(newKeyState)
-        end
-        --============================================================
-        ffi.copy(lastKeyState, newKeyState,256 )
-    end 
-    --================================================================
-    
-    -- update
-    local dt = (newTime - lastTime)/1000 ; -- sec
-    onUpdate(dt);
-    
-    -- draw
-    onDraw(dt)
-    --================================================================
-
-    --================================================================
-    lastTime =newTime;
-    --================================================================
-    DxLib.dx_ScreenFlip()
-    --================================================================
-    fpsLimit:limitFps(60) --test
-end
---====================================================================
-onExit()
---====================================================================
-DxLib.dx_DxLib_End();
+App.run()
 --====================================================================
