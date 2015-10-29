@@ -81,16 +81,30 @@ function App.onMouseDrag(MouseEvent,mouseX,mouseY)
     then 
         -- local r = targetImage:getMatrixedRect()
         -- local tv,sv,av = targetImage:getOffsetVector()
-        -- -- ??? angle ... ???
-        -- --============================================================
+        -- -- ??? angle ?
+        -- --=========================================================
         -- targetImage:setTranslate( rotMouseX -tv.x -r.width/2  -r.lastPos[1].x 
         --                         , rotMouseY -tv.y -r.height/2 -r.lastPos[1].y  
         --                         , 0)
         --============================================================
         local addX = mouseX -App.lastMouseX;
         local addY = mouseY -App.lastMouseY;
-        targetImage:setTranslate( targetImage.translateVector.x + addX
-                                , targetImage.translateVector.y + addY
+        local addVec = DxLib.dx_VGet(addX,addY,0);
+        --============================================================
+        if ( targetImage.parentRect ~=nil)
+        then 
+            addVec = DxLib.dx_VTransform(addVec,targetImage.parentRect:getAngleScaleMat());
+            local xr,yr,zr = targetImage:getAngle()
+            -- print ( math.deg(xr),math.deg(yr),math.deg(zr))
+            --========================================================
+            -- local angleVec = DxLib.dx_VGet(1,1,1);
+            -- angleVec = DxLib.dx_VTransform(angleVec,targetImage.parentRect:getAngleScaleMat());
+            --========================================================
+            -- ?? 
+        end 
+        --============================================================
+        targetImage:setTranslate( targetImage.translateVector.x + addVec.x 
+                                , targetImage.translateVector.y + addVec.y 
                                 , 0 )
     end 
 end 
@@ -122,7 +136,7 @@ end
 --====================================================================
 function App.onDraw(dt)
     --================================================================
-    drawBackGround(screenW,screenH,1)
+    drawBackGround(screenW,screenH)
     --================================================================
     -- circle
     --================================================================
@@ -157,16 +171,16 @@ function App.onDraw(dt)
     local isHitMouse =false
     
     -- set angle test 
-    rectTable[5]:setAngle( 0, 0, math.pi*2* count )
-    rectTable[6]:setAngle( 0, 0, math.pi*2* count )
-    rectTable[7]:setAngle( 0, 0, math.pi*2* count )
+     rectTable[5]:setAngle( 0, 0, math.pi*2* count )
+     rectTable[6]:setAngle( 0, 0, math.pi*2* count )
+     rectTable[7]:setAngle( 0, 0, math.pi*2* count )
     
     -- draw rect
     for i,v in ipairs(rectTable)
     do
         
         local r = v:getMatrixedRect() --get applied matrix rect
-        -- inverse test
+        -- -- inverse test
         -- local invMat =DxLib.dx_MInverse( r:getMatrix());
         -- r.optionalMatrix = invMat;
         -- r = r :getMatrixedRect() -- redo and store 

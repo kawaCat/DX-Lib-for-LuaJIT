@@ -214,6 +214,30 @@ function createRectangle(x,y,width,height)
     --================================================================
     
     ------------------------------------------------------------------
+    -- get angle.return radian value.
+    ------------------------------------------------------------------
+    function Rectangle:getAngle()
+        -- matrix multiply order = " x * y * x " then. ??
+        -- 1:z_Rad =  atan2(xy,xx) 
+        -- 2:y_Rad = -asin (xz) 
+        -- 3:x_Rad =  asin (yz/cos(y_Rad));if(zz<0) x_Rad = 180 - x_Rad;
+        --============================================================
+        local mat = self.matrix;
+        --============================================================
+        local yRad_ = -math.asin ( mat.m[0][2]);
+        local zRad_ =  math.atan2( mat.m[0][1],mat.m[0][0])
+        local xRad_ =  math.asin ( mat.m[1][2]/math.cos(yRad_)) 
+        --============================================================
+        if (mat.m[2][2] <0)
+        then 
+           xRad_ =180-xRad_
+        end   
+        --============================================================
+        return xRad_,yRad_,zRad_;
+    end 
+    --================================================================
+    
+    ------------------------------------------------------------------
     -- get allParent "translate,angle,scale" Sum vector 
     ------------------------------------------------------------------
     function Rectangle:getOffsetVector()
@@ -236,11 +260,12 @@ function createRectangle(x,y,width,height)
     --================================================================
    
     ------------------------------------------------------------------
-    -- get applied "angle,Scale" Matrix. origin pos is this rect centor.
+    -- get applied "angle,Scale" Matrix.  origin pos is 0.0 , now
     ------------------------------------------------------------------
     function Rectangle:getAngleScaleMat()
         --============================================================
-        local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
+        --local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
+        local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( 0,0 ,0));
         local mt =  baseMat;
         mt = self:_MulMatrix( mt, DxLib.dx_MGetScale( self.scaleVector   ));
         mt = self:_MulMatrix( mt, DxLib.dx_MGetRotX ( self.angleVector.x ));
@@ -263,7 +288,7 @@ function createRectangle(x,y,width,height)
     --================================================================
     
     ------------------------------------------------------------------
-    -- get applied "angle,Scale" Inverse Matrix. origin pos is this rect centor.
+    -- get applied "angle,Scale" Inverse Matrix. 
     ------------------------------------------------------------------
     function Rectangle:getInverseAngleScaleMat()
         return DxLib.dx_MInverse( self:getAngleScaleMat())
@@ -391,4 +416,5 @@ function createRectangle(x,y,width,height)
     return Rectangle;
 end
 --====================================================================
+
 
