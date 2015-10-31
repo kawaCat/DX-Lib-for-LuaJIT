@@ -27,13 +27,17 @@ function createRectangle(x,y,width,height)
     Rectangle.width  = width or 100
     Rectangle.height = height or 100
     Rectangle.pos = {}     -- x,y,z -- pos1[1],pos[2].. -- yet create
-    Rectangle.lastPos = {} -- 
     Rectangle.translateVector = DxLib.dx_VGet(0,0,0); -- x,y,z
     Rectangle.scaleVector     = DxLib.dx_VGet(1,1,1); -- xScale,yScale,zScale
     Rectangle.angleVector     = DxLib.dx_VGet(0,0,0); -- xAngle,yAngle,zAngle
-    Rectangle.matrix = nil; -- yet create Matrix
-    Rectangle.parentRect = nil; -- if need 
-    Rectangle.optionalMatrix = nil -- if need
+    Rectangle.matrix = DxLib.dx_MGetIdent() ; 
+    Rectangle.optionalMatrix = nil; -- if need
+    Rectangle.childRect ={}; -- if need 
+    Rectangle.parentRect = nil;
+    Rectangle._b_NeedReMatrix =true;
+    Rectangle._scaleMatrix = nil;
+    Rectangle._angleMatrix = nil;
+    Rectangle._transMatrix = nil;
     --================================================================
     
     ------------------------------------------------------------------
@@ -84,6 +88,7 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     function Rectangle:setTranslate(moveX,moveY,moveZ)
         self.translateVector = DxLib.dx_VGet(moveX,moveY,moveZ);
+        self:_needReMatrix();
     end ;
     --================================================================
     
@@ -95,6 +100,7 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     function Rectangle:setScale(xScale,yScale,zScale)
         self.scaleVector  = DxLib.dx_VGet(xScale,yScale,zScale);
+        self:_needReMatrix();
     end ;
     --================================================================
     
@@ -106,13 +112,38 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     function Rectangle:setAngle(xRadian,yRadian,zRadian)
         self.angleVector = DxLib.dx_VGet(xRadian,yRadian,zRadian);
+        self:_needReMatrix();
     end ;
     --================================================================
     
     ------------------------------------------------------------------
-    -- @param Rectangle  if disable parent Rectangle , call as Rectangle(in arg) is nil.
+    -- @param rectangle  if disable parent Rectangle , call as Rectangle(in arg) is nil.
     ------------------------------------------------------------------
-    function Rectangle:setParentRect(rectangle) self.parentRect = rectangle; end ;
+    function Rectangle:setParentRect(rectangle)
+        self.parentRect = rectangle; 
+        table.insert (self.parentRect.childRect,self);
+    end ;
+    --================================================================
+    
+    ------------------------------------------------------------------
+    -- add child rectangle. 
+    -- @param rectangle 
+    -- @see setParentRect
+    ------------------------------------------------------------------
+    function Rectangle:addChildRect(rectangle)
+        rectangle.parentRect = self; 
+        table.insert (self.childRect,rectangle);
+    end
+    --================================================================
+    
+    ------------------------------------------------------------------
+    -- get Center position.
+    ------------------------------------------------------------------
+    function Rectangle:getCenterPosition()
+        local cx = self.x + self.width  /2
+        local cy = self.y + self.height /2
+        return cx,cy
+    end 
     --================================================================
     
     ------------------------------------------------------------------
@@ -170,68 +201,81 @@ function createRectangle(x,y,width,height)
         -- error: NYI: cannot call this C function (yet) -- from luajit ffi?
         -- matrix = DxLib.dx_MMult( matrix, DxLib.dx_MGetScale( self.scaleVector  ) ) ;
         --============================================================
-        -- set origin pos (base position) 
-        local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
-        self.matrix = baseMat;
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetScale( self.scaleVector   ));
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotX ( self.angleVector.x ));
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotY ( self.angleVector.y ));
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotZ ( self.angleVector.z ));
-        -- revert origin pos
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MInverse( baseMat));
-        --============================================================
-        -- apply translate
-        self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetTranslate( self.translateVector));
-        --============================================================
-        if (self.parentRect ~= nil )
+        if ( self._b_NeedReMatrix == true)
         then 
-            -- apply parent Rect matrix
-            self.matrix = self:_MulMatrix( self.matrix, self.parentRect:getMatrix() ) ;
+            -- set origin pos (base position) 
+            local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
+            self.matrix = baseMat;
+            --========================================================
+            if (self.scaleVector .x ~=1 and self.scaleVector .y ~=1 and self.scaleVector.z ~=1 )    
+            then 
+                self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetScale( self.scaleVector   ));
+            end
+            --========================================================
+            if ( self.angleVector.x ~=0.0)
+            then 
+                self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotX ( self.angleVector.x ));
+            end
+            if ( self.angleVector.y  ~=0.0)
+            then 
+                self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotY ( self.angleVector.y ));
+            end
+            if ( self.angleVector.z ~=0.0 )  
+            then
+                self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotZ ( self.angleVector.z ));
+            end
+            --========================================================
+            -- revert origin pos
+            self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MInverse( baseMat));
+            --========================================================
+            -- apply translate
+            self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetTranslate( self.translateVector));
+            --========================================================
+            if (self.parentRect ~= nil )
+            then 
+                -- apply parent Rect matrix
+                self.matrix = self:_MulMatrix( self.matrix, self.parentRect:getMatrix() ) ;
+            end 
+            --========================================================
+            if ( self.optionalMatrix ~= nil)
+            then 
+                -- apply optional matrix
+                self.matrix = self:_MulMatrix( self.matrix, self.optionalMatrix ) ;
+            end 
+            --========================================================
+            self._b_NeedReMatrix  =false    
         end 
         --============================================================
-        if ( self.optionalMatrix ~= nil)
-        then 
-            -- apply optional matrix
-            self.matrix = self:_MulMatrix( self.matrix, self.optionalMatrix ) ;
-        end 
-        --============================================================
-        self.lastPos = self.pos
         local rect  = createRectangle() 
         -- overwrite 
         rect.pos[1]  = DxLib.dx_VTransform( self.pos[1], self.matrix ) ;
         rect.pos[2]  = DxLib.dx_VTransform( self.pos[2], self.matrix ) ;
         rect.pos[3]  = DxLib.dx_VTransform( self.pos[3], self.matrix ) ;
         rect.pos[4]  = DxLib.dx_VTransform( self.pos[4], self.matrix ) ;
-        rect.lastPos = self.lastPos 
         rect.matrix  = self.matrix 
         rect.x       = rect.pos[1].x
-        rect.y       = rect.pos[2].y
-        rect.width   = rect.pos[3].x-rect.pos[1].x
-        rect.height  = rect.pos[4].y-rect.pos[1].y
+        rect.y       = rect.pos[1].y
+        rect.width   = rect.pos[2].x-rect.pos[1].x
+        rect.height  = rect.pos[3].y-rect.pos[1].y
+        rect.parentRect = self.parentRect;
         --============================================================
         return rect;
     end 
     --================================================================
     
     ------------------------------------------------------------------
-    -- get angle.return radian value.
+    -- get angle.return radian value.  (deg -180.0 ~ 180.0)
     ------------------------------------------------------------------
     function Rectangle:getAngle()
-        -- matrix multiply order = " x * y * x " then. ??
-        -- 1:z_Rad =  atan2(xy,xx) 
-        -- 2:y_Rad = -asin (xz) 
-        -- 3:x_Rad =  asin (yz/cos(y_Rad));if(zz<0) x_Rad = 180 - x_Rad;
+        -- ??? 
         --============================================================
         local mat = self.matrix;
+        --local mat = self:getAngleMat();
         --============================================================
-        local yRad_ = -math.asin ( mat.m[0][2]);
         local zRad_ =  math.atan2( mat.m[0][1],mat.m[0][0])
-        local xRad_ =  math.asin ( mat.m[1][2]/math.cos(yRad_)) 
-        --============================================================
-        if (mat.m[2][2] <0)
-        then 
-           xRad_ =180-xRad_
-        end   
+        local yRad_ = -math.asin ( mat.m[0][2]);
+        -- local yRad_ =  math.atan2 ( mat.m[0][2],mat.m[0][0]);
+        local xRad_ =  math.atan2 ( mat.m[1][2],mat.m[1][1]) 
         --============================================================
         return xRad_,yRad_,zRad_;
     end 
@@ -262,25 +306,22 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     -- get applied "angle,Scale" Matrix.  origin pos is 0.0 , now
     ------------------------------------------------------------------
-    function Rectangle:getAngleScaleMat()
+    function Rectangle:getAngleMat()
         --============================================================
-        --local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
-        local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( 0,0 ,0));
-        local mt =  baseMat;
-        mt = self:_MulMatrix( mt, DxLib.dx_MGetScale( self.scaleVector   ));
+        local mt =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( 0,0 ,0));
+        --mt = self:_MulMatrix( mt, DxLib.dx_MGetScale( self.scaleVector   ));
         mt = self:_MulMatrix( mt, DxLib.dx_MGetRotX ( self.angleVector.x ));
         mt = self:_MulMatrix( mt, DxLib.dx_MGetRotY ( self.angleVector.y ));
         mt = self:_MulMatrix( mt, DxLib.dx_MGetRotZ ( self.angleVector.z ));
-        mt = self:_MulMatrix( mt, DxLib.dx_MInverse ( baseMat ));
         --============================================================
         if (self.parentRect ~= nil )
         then 
-            self.matrix = self:_MulMatrix( self.matrix, self.parentRect:getMatrix() ) ;
+            mt = self:_MulMatrix( mt, self.parentRect:getAngleMat() ) ;
         end 
         --============================================================
         if ( self.optionalMatrix ~= nil)
         then 
-            self.matrix = self:_MulMatrix( self.matrix, self.optionalMatrix ) ;
+            mt = self:_MulMatrix( mt, self.optionalMatrix ) ;
         end 
         --============================================================
         return mt;
@@ -290,8 +331,8 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     -- get applied "angle,Scale" Inverse Matrix. 
     ------------------------------------------------------------------
-    function Rectangle:getInverseAngleScaleMat()
-        return DxLib.dx_MInverse( self:getAngleScaleMat())
+    function Rectangle:getInverseAngleMat()
+        return DxLib.dx_MInverse( self:getAngleMat())
     end 
     --================================================================
     
@@ -322,13 +363,12 @@ function createRectangle(x,y,width,height)
             --========================================================
         end
         --============================================================
-        local out =false
         if (cnt <=-4 or cnt >= 4)
         then 
-            out =true
+            return true
         end
         --============================================================
-        return out 
+        return false 
     end
     --================================================================
     
@@ -338,7 +378,7 @@ function createRectangle(x,y,width,height)
     ------------------------------------------------------------------
     function Rectangle:checkColisionRect(targetRect)
         --============================================================
-        for i=1,4
+        for i=1,4,1
         do
             local point = targetRect.pos[i]
             local isContact = self:checkColisionPoint(point.x,point.y)
@@ -352,6 +392,15 @@ function createRectangle(x,y,width,height)
     end
     --================================================================
     
+    --================================================================
+    function Rectangle:_needReMatrix()
+        self._b_NeedReMatrix =true;
+        --============================================================
+        for i,v in ipairs(self.childRect)
+        do
+            v:_needReMatrix();
+        end 
+    end 
     --================================================================
     -- from DX library refernce page.
     -- in MMult() function.

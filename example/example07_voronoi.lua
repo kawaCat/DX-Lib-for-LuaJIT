@@ -1,13 +1,8 @@
 --====================================================================
 -- this voronoi algolism is 
 -- https://github.com/camconn/voronoi
--- 
--- and this algolism's license GNU Public License.
--- 
--- This project is licensed under the GNU Public License,
--- Verion 3 or Later. A copy of this license may be found in the file LICENSE.
---
 -- thanks camconn.
+-- and this algolism's license GNU Public License.
 --====================================================================
 
 --====================================================================

@@ -56,7 +56,7 @@ function App.onKeyboardPress(KeyEvent)
     -- end 
 end
 --====================================================================
-function App.onKeyBoardRelease(KeyEvent)end 
+function App.onKeyboardRelease(KeyEvent)end 
 --====================================================================
 function App.onUpdate(dt)
     count = count+dt/3

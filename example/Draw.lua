@@ -2,7 +2,7 @@
 -- @module Draw
 ----------------------------------------------------------------------
 
--- more function see DX ライブラリ reference page.
+-- more function at DX ライブラリ reference page.
 -- this is jp language web page. but　exist most example.
 -- 
 -- # reference page
@@ -39,7 +39,7 @@ function drawBackGround(width,height,style,num_)
                                                , 255/num *(i+1)
                                                , 255/num )
                             , true
-            )
+                            )
         elseif (style_==2)
         then 
              DxLib.dx_DrawBox( rectWidth *i
@@ -49,16 +49,6 @@ function drawBackGround(width,height,style,num_)
                             , DxLib.dx_GetColor( 255/num 
                                                , 200/num *(i+1)+55
                                                , 255)
-                            , true
-                            )
-        else
-            DxLib.dx_DrawBox( rectWidth *i
-                            , 0
-                            , rectWidth *(i+1)
-                            , rectHeight
-                            , DxLib.dx_GetColor( 255
-                                               , 255/num *(i+1)
-                                               , 255/num )
                             , true
                             )
         end 

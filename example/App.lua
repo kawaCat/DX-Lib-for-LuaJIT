@@ -81,7 +81,7 @@ function App.onMouseWheel(rotValue)end
 --====================================================================
 function App.onKeyboardPress(KeyEvent)end
 --====================================================================
-function App.onKeyBoardRelease(KeyEvent)end 
+function App.onKeyboardRelease(KeyEvent)end 
 --====================================================================
 function App.onUpdate(dt) end 
 --====================================================================
@@ -159,12 +159,15 @@ function App.run()
     App.init ();
     --================================================================
     App.prepare();
+    
+    local dt = 0;
     --================================================================
     while ( DxLib.dx_ProcessMessage() == 0  and
             DxLib.dx_CheckHitKey( DxLib.KEY_INPUT_ESCAPE ) == 0 )
     do
         -- update process Time;
         newTime =DxLib.dx_GetNowCount(false);
+        
         
         -- prepare for draw. clear fill
         --============================================================
@@ -173,6 +176,9 @@ function App.run()
         --============================================================
         DxLib.dx_SetDrawBlendMode(DxLib.DX_BLENDMODE_ALPHA,255)
         --============================================================
+        
+        -- draw
+        App.onDraw(dt)
         
         -- Mouse Point
         DxLib.dx_GetMousePoint(mouseX,mouseY);
@@ -245,7 +251,7 @@ function App.run()
                 App.onKeyboardPress(newKeyState);
                 isKeyPress =true;
             else
-                App.onKeyBoardRelease(newKeyState)
+                App.onKeyboardRelease(newKeyState)
                 isKeyPress =false;
             end
             --========================================================
@@ -254,11 +260,8 @@ function App.run()
         --============================================================
         
         -- update
-        local dt = (newTime - lastTime)/1000 ; -- sec
+        dt = (newTime - lastTime)/1000 ; -- sec
         App.onUpdate(dt);
-        
-        -- draw
-        App.onDraw(dt)
         --============================================================
 
         --============================================================

@@ -37,14 +37,6 @@ end
 function App.prepare()
     DxLib.dx_ChangeFont( "Arial" ,-1) ;
     DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) 
-    
-    -- image
-    graphicHandle = DxLib.dx_LoadGraph( "resources/hatsuneMiku.png", false );
-
-    -- sound
-    soundHandle = DxLib.dx_LoadSoundMem( "resources/button.ogg" ,3,-1)
-    playingSoundTable = {}
-    lastPlayTime = 0;
 end
 --====================================================================
 function App.onUpdate(dt)end 
@@ -92,11 +84,6 @@ function App.onDraw(dt)
         DxLib.dx_DrawString( 10, 10 + fontSize, str, DxLib.dx_GetColor(0,0,0), -1 );
     end
     --================================================================
-
-    --================================================================
-    -- store last mouse point
-    lastMouseInput = DxLib.dx_GetMouseInput();
-
 end
 --====================================================================
 function App.onExit()end
