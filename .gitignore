@@ -21,6 +21,8 @@ $RECYCLE.BIN/
 log.txt
 examlple/log.txt
 examlple/test.png
+_test/*
+_test/*.*
 
 # =========================
 # Operating System Files

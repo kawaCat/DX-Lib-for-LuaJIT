@@ -2,13 +2,7 @@
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App");
-require("fpsLimit")
-require("LoadFont")
-require("Rectangle")
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -50,9 +44,6 @@ function App.init ()
 end
 --====================================================================
 function App.prepare()
-    
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20
@@ -194,9 +185,9 @@ function App.onDraw(dt)
     -- set angle test 
     rectTable[5]:setAngle( math.pi*2* count, 0, math.pi*2* count )
     rectTable[6]:setAngle( 0, math.pi*2* count, math.pi*2* count )
-    rectTable[7]:setAngle( 0, 0, math.pi*2* count )
-    rectTable[3]:setScale( 0.6 + 0.4* math.sin(math.pi*2* count)
-                         , 0.6 + 0.4* math.sin(math.pi*2* count)
+    rectTable[7]:setAngle( 0,                0, math.pi*2* count )
+    rectTable[3]:setScale( 0.6 + 0.4* math.sin( math.pi*2* count )
+                         , 0.6 + 0.4* math.sin( math.pi*2* count )
                          , 0 )
     -- draw rect
     for i,v in ipairs(rectTable)

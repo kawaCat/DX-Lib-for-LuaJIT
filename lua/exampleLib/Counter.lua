@@ -39,7 +39,7 @@ function createCounter(frameNum)
     ------------------------------------------------------------------
     -- set to backword. in step()
     ------------------------------------------------------------------
-    function Counter:setBackWord()
+    function Counter:setBackword()
         self:_calcStepValue()
         self:toggle();
     end 

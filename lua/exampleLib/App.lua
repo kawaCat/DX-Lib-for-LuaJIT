@@ -120,16 +120,19 @@ function _checkMousePress(mEv)
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_LEFT) ~= 0 )
     then 
         isMouseLeftPress =true;
+        App.isMouseLeftPress = isMouseLeftPress;
     end
     
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_RIGHT) ~= 0 )
     then 
         isMouseRightPress =true;
+        App.isMouseRightPress = isMouseRightPress;
     end
     
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_MIDDLE) ~= 0 )
     then 
         isMouseMiddlePress =true;
+        App.isMouseMiddlePress = isMouseMiddlePress;
     end
 end
 --====================================================================
@@ -137,16 +140,19 @@ function _checkMouseRelease(mEv)
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_LEFT) == 0 )
     then 
         isMouseLeftPress =false;
+        App.isMouseLeftPress = isMouseLeftPress;
     end
     
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_RIGHT) == 0 )
     then 
         isMouseRightPress =false;
+        App.isMouseRightPress = isMouseRightPress;
     end
     
     if ( bit.band(mEv,DxLib.MOUSE_INPUT_MIDDLE) == 0 )
     then 
         isMouseMiddlePress =false;
+        App.isMouseMiddlePress = isMouseMiddlePress;
     end
 end
 --====================================================================
@@ -167,7 +173,6 @@ function App.run()
     do
         -- update process Time;
         newTime =DxLib.dx_GetNowCount(false);
-        
         
         -- prepare for draw. clear fill
         --============================================================
@@ -212,13 +217,15 @@ function App.run()
         then
             if ( lastMouseInput < newMouseInput )
             then 
+                _checkMousePress(newMouseInput);
                 App.onMousePress ( newMouseInput,mouseX[0],mouseY [0])
                 isMousePress = true
-                _checkMousePress(newMouseInput);
+                
             else
+                _checkMouseRelease(newMouseInput)
                 App.onMouseRelease ( newMouseInput,mouseX[0],mouseY[0] )
                 isMousePress = false
-                _checkMouseRelease(newMouseInput)
+                
             end
         end
         lastMouseInput = DxLib.dx_GetMouseInput();

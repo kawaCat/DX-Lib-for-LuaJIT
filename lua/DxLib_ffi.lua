@@ -1218,9 +1218,10 @@ typedef struct tagBASEIMAGE
 // ラインデータ型
 typedef struct tagLINEDATA
 {
-    int                        x1, y1, x2, y2 ;                       // 座標
-    int                        color ;                                // 色
-    int                        pal ;                                  // パラメータ
+    int  x1, y1 ;                     // 座標
+    int  x2, y2 ; 
+    int  color ;                                // 色
+    int  pal ;                                  // パラメータ
 } LINEDATA, *LPLINEDATA ;
 
 // 座標データ型

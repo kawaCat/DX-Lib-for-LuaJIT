@@ -2,55 +2,79 @@
 --====================================================================
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
---====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App")
-require("Draw")
+local bit = require("bit")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
+
+-- init
+--====================================================================
+function init ()
+    -- init
+    DxLib.dx_ChangeWindowMode(true)
+    DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ;
+    DxLib.dx_SetOutApplicationLogValidFlag(true)
+    DxLib.dx_SetAlwaysRunFlag(true)
+    DxLib.dx_SetBackgroundColor(255,255,255) --white 
+    --================================================================
+    DxLib.dx_DxLib_Init();
+    --================================================================
+end 
 --====================================================================
 
+-- init ,setup Dx Library
+init ()
+--====================================================================
+
+-- for store mouse point
+local mouseX = ffi.new("int[1]");
+local mouseY = ffi.new("int[1]");
+
 -- font
+DxLib.dx_ChangeFont( "Arial" ,-1) ;
+DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) 
 local fontSize = 15
 
 -- for animation
 local count =0;
 
 --====================================================================
-function App.init ()
-    -- init
-    DxLib.dx_ChangeWindowMode(true)
-    DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ;
-    DxLib.dx_SetOutApplicationLogValidFlag(false)
-    DxLib.dx_SetAlwaysRunFlag(true)
-    DxLib.dx_SetBackgroundColor(255,255,255) --white 
+function drawBackGround(width,height)
     --================================================================
-    DxLib.dx_DxLib_Init();
+    local num = 10;
+    local rectWidth =width /num;
+    local rectHeight = height;
     --================================================================
-end
---====================================================================
-function App.prepare()
-    DxLib.dx_ChangeFont( "Arial" ,-1) ;
-    DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) 
-end
---====================================================================
-function App.onUpdate(dt)
-    -- animation count
-    count = count+dt/3
-    if ( count >= 1)
-    then
-        count =0;
+    for i=0,num-1
+    do
+        DxLib.dx_DrawBox( rectWidth *i
+                         ,0
+                         ,rectWidth *(i+1)
+                         ,rectHeight
+                         ,DxLib.dx_GetColor(255/num *(i+1),255,255)
+                         ,true
+                        )
     end 
 end 
 --====================================================================
-function App.onDraw(dt)
-    -- background
-    drawBackGround(screenW,screenH,2)
+
+-- main loop
+--====================================================================
+while ( DxLib.dx_ProcessMessage() == 0  and
+        DxLib.dx_CheckHitKey( DxLib.KEY_INPUT_ESCAPE ) == 0 )
+do
+    DxLib.dx_SetDrawScreen( DxLib.DX_SCREEN_BACK )
+    DxLib.dx_ClearDrawScreen(nil)
+    --================================================================
+    DxLib.dx_SetFontSize(fontSize);
+    DxLib.dx_SetDrawBlendMode(DxLib.DX_BLENDMODE_ALPHA,255)
+    --================================================================
+    drawBackGround(screenW,screenH)
+    --================================================================
     
     -- Mouse Point
-    local str ="MousePoint :" .. App.mouseX .. ":" .. App.mouseY;
+    DxLib.dx_GetMousePoint(mouseX,mouseY);
+    local str ="MousePoint :" .. mouseX[0] .. ":" .. mouseY[0];
     DxLib.dx_DrawString( 10, 10, str, DxLib.dx_GetColor(0,0,0), -1 );    
     --================================================================
     
@@ -73,14 +97,13 @@ function App.onDraw(dt)
     DxLib.dx_SetDrawBlendMode(DxLib.DX_BLENDMODE_ALPHA,255)
     
     -- drawCircle
-    local move = math.abs(math.sin(math.rad(360 * count)) * 100 );
+    local move = math.abs(math.sin(math.rad(count)) * 100 );
     local circleX = 200 + move
     local circleY = 200
     DxLib.dx_DrawCircle(  circleX, circleY
                         , 20 --radius
                         , DxLib.dx_GetColor(150,0,255), true -- color,fillflag
                         ,1);--linethickness
-                    
     DxLib.dx_DrawLine  (  circleX
                         , circleY 
                         , screenW-160
@@ -97,11 +120,17 @@ function App.onDraw(dt)
                         , DxLib.dx_GetColor(0,0,0)
                         , -1 );  --edgeColor (-1 is none )
     --================================================================
+    -- animation count
+    count = count+1.5
+    if ( count >= 360)
+    then
+        count =0;
+    end 
+    
+    --================================================================
+    DxLib.dx_ScreenFlip()
 end
 --====================================================================
-function App.onExit()end
+DxLib.dx_DxLib_End()
 --====================================================================
 
---====================================================================
-App.run()
---====================================================================

@@ -2,13 +2,7 @@
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App");
-require("fpsLimit")
-require("LoadFont")
-require("Rectangle")
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -45,8 +39,8 @@ function App.init ()
     --================================================================
     DxLib.dx_DxLib_Init();
     --================================================================
-    DxLib.dx_DragFileInfoClear();   -- ドロップファイル情報の初期化
-    DxLib.dx_SetDragFileValidFlag(true) -- ファイルのD&Dを許可
+    DxLib.dx_DragFileInfoClear();  
+    DxLib.dx_SetDragFileValidFlag(true)
 end
 --====================================================================
 function App.prepare()
@@ -72,24 +66,7 @@ function App.prepare()
     captionText =  createTextImage(str,25)
 end
 --====================================================================
-function App.onMouseDrag(MouseEvent,mouseX,mouseY)
-    if (  App.isMousePress == true and targetImage ~= nil )
-    then 
-        -- local r = targetImage:getMatrixedRect()
-        -- local tv,sv,av = targetImage:getOffsetVector()
-        -- -- ??? angle ... ???
-        -- --============================================================
-        -- targetImage:setTranslate( rotMouseX -tv.x -r.width/2  -r.lastPos[1].x 
-        --                         , rotMouseY -tv.y -r.height/2 -r.lastPos[1].y  
-        --                         , 0)
-        --============================================================
-        local addX = mouseX -App.lastMouseX;
-        local addY = mouseY -App.lastMouseY;
-        targetImage:setTranslate( targetImage.translateVector.x + addX
-                                , targetImage.translateVector.y + addY
-                                , 0 )
-    end 
-end 
+function App.onMouseDrag(MouseEvent,mouseX,mouseY)end 
 --====================================================================
 function App.onMousePress(MouseEvent,mouseX,mouseY)end
 --====================================================================
@@ -169,8 +146,6 @@ function App.onDraw(dt)
 end
 --====================================================================
 function App.onExit()
-    --================================================================
-    -- delete font resource
     loadedFont:destroy();
 end
 --====================================================================

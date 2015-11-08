@@ -1,8 +1,8 @@
 --====================================================================
 -- this voronoi algolism is 
 -- https://github.com/camconn/voronoi
--- thanks camconn.
 -- and this algolism's license GNU Public License.
+-- thanks camconn.
 --====================================================================
 
 --====================================================================
@@ -11,13 +11,7 @@ math.randomseed(os.clock());
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App");
-require("LoadFont")
-require("fpsLimit");
-require("Voronoi")
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -102,8 +96,6 @@ function App.init ()
 end
 --====================================================================
 function App.prepare()
-    
-    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
     jpFontHandle = DxLib.dx_CreateFontToHandle( "Ricty" -- japanese font
                                               , jpFontSize
@@ -114,9 +106,6 @@ function App.prepare()
                                               , false
                                               , false
                                           )
-                                          
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20
@@ -153,7 +142,7 @@ function App.onDraw(dt)
                     , screenH/2-voronoiH/2 + voronoiH +frameWidth --y2
                     , DxLib.dx_GetColor( 0,60,0 )
                     , true --fillflag
-                )
+                    )
                 
     -- draw voronoi software image
     DxLib.dx_DrawSoftImage( screenW/2-voronoiW/2, screenH/2-voronoiH/2, voronoiImage ) ;

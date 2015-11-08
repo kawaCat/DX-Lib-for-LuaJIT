@@ -2,12 +2,7 @@
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App");
-require("fpsLimit")
-require("LoadFont")
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -102,17 +97,11 @@ end
 --====================================================================
 function App.prepare()
     
-    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 );
-    
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20
     DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) --draw font type.
-
-    -- set CharCode to fontHandle
     DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
     --================================================================
     

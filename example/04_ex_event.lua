@@ -2,11 +2,8 @@
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
 --====================================================================
-local App = require("App");
-require("fpsLimit");
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;

@@ -2,12 +2,7 @@
 local ffi = require("ffi")
 local DxLib = require("DxLib_ffi");
 --====================================================================
-package.path = package.path ..";".."example/?.lua;"
---====================================================================
-local App = require("App");
-require("fpsLimit")
-require("LoadFont")
-require("Draw")
+local App = require("exampleLib")
 --====================================================================
 local screenW = 550;
 local screenH = 350;
@@ -30,15 +25,16 @@ local makeScreenH = screenH/2
 local screenHandle = nil --create in prepare()
 local penImage = nil   
 
--- draw To screen that was created by dx_MakeScreen() function
+--
 --====================================================================
-function _drawImageToScreen()
+function _drawImageToScreen(screenHandle_,imageHandle_)
     -- change drawTarget 
-    DxLib.dx_SetDrawScreen( screenHandle )
+    DxLib.dx_SetDrawScreen( screenHandle_ )
     
     -- clear fill 
     DxLib.dx_ClearDrawScreen(nil) 
     --================================================================
+    DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_ALPHA , 255 ) ;
     
     --draw image to screenHandle 
     local num = 20;
@@ -48,7 +44,7 @@ function _drawImageToScreen()
                               , makeScreenH*math.random()
                               , math.random()*0.2 +0.2
                               , math.rad(360*math.random())
-                              , penImage 
+                              , imageHandle_ 
                               , true     -- TransFlag,  
                               , false ); -- invert flag (  TurnFlag)
     end 
@@ -75,17 +71,13 @@ end
 --====================================================================
 function App.prepare()
     
-    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 );
     
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20
     DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) --draw font type.
 
-    -- set CharCode to fontHandle
     DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
     --================================================================
     
@@ -95,7 +87,7 @@ function App.prepare()
     penImage = DxLib.dx_LoadGraph( "resources/pen.png", false );  
     
     -- prepare draw before main loop
-    _drawImageToScreen();
+    _drawImageToScreen(screenHandle,penImage);
 
     --================================================================
     -- menu test -- menu select check at onUpdate.
@@ -118,7 +110,7 @@ end
 --====================================================================
 function App.onMousePress(MouseEvent,mouseX,mouseY)
     -- redraw
-    _drawImageToScreen();
+    _drawImageToScreen(screenHandle,penImage);
 end
 --====================================================================
 function App.onUpdate(dt)
@@ -186,7 +178,6 @@ function App.onDraw(dt)
              , 1 -0.5 * sineMod
              , (math.pi*2) * count  ) 
         
-    
     --================================================================
     fpsLimit:limitFps(60)
 end

@@ -21,11 +21,11 @@ function createFpsLimit()
     FpsLimit.fps =0
     FpsLimit._fpsTable ={}
     FpsLimit.avgCount =60
-    FpsLimit.lastTime = DxLib.dx_GetNowCount(false)
+    FpsLimit.lastTime = 0
     --================================================================
     
     ------------------------------------------------------------------
-    -- getFps
+    -- getFps (avg)
     ------------------------------------------------------------------
     function FpsLimit:getFps() 
         local sumFps = 0
@@ -43,7 +43,7 @@ function createFpsLimit()
     ------------------------------------------------------------------
     function FpsLimit:limitFps(limitFps)
         --============================================================
-        local nowTime = DxLib.dx_GetNowCount(false)
+        local nowTime = self:getTime()
         --============================================================
         local distanceTime = nowTime -self.lastTime
         local targetTime =1000/limitFps
@@ -54,7 +54,7 @@ function createFpsLimit()
             DxLib.dx_WaitTimer( sleepTime_W)
         end
         --============================================================
-        local waitedTime = DxLib.dx_GetNowCount(false);
+        local waitedTime = self:getTime()
         self.fps = 1000/(waitedTime -self.lastTime)
         self.lastTime = waitedTime
         --============================================================
@@ -65,9 +65,21 @@ function createFpsLimit()
     --================================================================
     
     --================================================================
+    function FpsLimit:getTime()
+        -- if use DxLib
+        return DxLib.dx_GetNowCount(false);
+        --============================================================
+        -- case of native lua
+        -- return os.clock()*1000;
+    end 
+    --================================================================
     function FpsLimit:sleep(n)  -- seconds
-        local t0 = os.clock()
-        while os.clock() - t0 <= n do end
+        -- if use DxLib
+        DxLib.dx_WaitTimer( n)
+        --============================================================
+        -- case of native lua
+        -- local t0 = os.clock()
+        -- while os.clock() - t0 <= n/1000 do end
     end
     --================================================================
     function FpsLimit:_initFpsTable()
@@ -79,6 +91,7 @@ function createFpsLimit()
     --================================================================
     
     --================================================================
+    FpsLimit.lastTime = FpsLimit:getTime();
     FpsLimit:_initFpsTable();
     --================================================================
     return FpsLimit;

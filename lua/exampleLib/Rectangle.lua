@@ -207,7 +207,7 @@ function createRectangle(x,y,width,height)
             local baseMat =  DxLib.dx_MGetTranslate( DxLib.dx_VGet( -self.x-self.width/2,-self.y-self.height/2 ,0));
             self.matrix = baseMat;
             --========================================================
-            if (self.scaleVector .x ~=1 and self.scaleVector .y ~=1 and self.scaleVector.z ~=1 )    
+            if (self.scaleVector .x ~=1 or self.scaleVector .y ~=1 or self.scaleVector.z ~=1 )    
             then 
                 self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetScale( self.scaleVector   ));
             end
@@ -216,11 +216,11 @@ function createRectangle(x,y,width,height)
             then 
                 self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotX ( self.angleVector.x ));
             end
-            if ( self.angleVector.y  ~=0.0)
+            if ( self.angleVector.y ~=0.0)
             then 
                 self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotY ( self.angleVector.y ));
             end
-            if ( self.angleVector.z ~=0.0 )  
+            if ( self.angleVector.z ~=0.0)  
             then
                 self.matrix = self:_MulMatrix( self.matrix, DxLib.dx_MGetRotZ ( self.angleVector.z ));
             end
@@ -267,14 +267,14 @@ function createRectangle(x,y,width,height)
     -- get angle.return radian value.  (deg -180.0 ~ 180.0)
     ------------------------------------------------------------------
     function Rectangle:getAngle()
-        -- ??? 
+        -- ????
         --============================================================
-        local mat = self.matrix;
-        --local mat = self:getAngleMat();
+        --local mat = self.matrix;
+        local mat = self:getAngleMat();
         --============================================================
         local zRad_ =  math.atan2( mat.m[0][1],mat.m[0][0])
         local yRad_ = -math.asin ( mat.m[0][2]);
-        -- local yRad_ =  math.atan2 ( mat.m[0][2],mat.m[0][0]);
+        --local yRad_ =  math.atan2 ( mat.m[0][2],mat.m[0][0]);
         local xRad_ =  math.atan2 ( mat.m[1][2],mat.m[1][1]) 
         --============================================================
         return xRad_,yRad_,zRad_;
@@ -465,5 +465,20 @@ function createRectangle(x,y,width,height)
     return Rectangle;
 end
 --====================================================================
+
+
+-- ???
+-- test 
+-- local test  = createRectangle()
+-- local x_deg = 90
+-- local y_deg = 90
+-- local z_deg = 120
+-- test:setAngle(math.rad(x_deg),math.rad(y_deg),math.rad(z_deg));
+ 
+-- local xrad ,yrad,zrad = test:getAngle()
+-- xrad =math.deg(xrad)
+-- yrad =math.deg(yrad)
+-- zrad =math.deg(zrad)
+-- print ( xrad,yrad,zrad)
 
 
