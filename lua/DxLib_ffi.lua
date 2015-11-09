@@ -2366,7 +2366,7 @@ int  __stdcall dx_RectClipping( RECT *  Rect, const RECT *  ClippuRect);
 int  __stdcall dx_RectAdjust( RECT *  Rect);
 int  __stdcall dx_GetRectSize( const RECT *  Rect, int *  Width, int *  Height);
 MATRIX  __stdcall dx_MGetIdent( void);
-MATRIX  __stdcall dx_MMult( MATRIX  In1, MATRIX  In2);
+MATRIX   (*dx_MMult)( MATRIX  In1, MATRIX  In2);
 MATRIX  __stdcall dx_MScale( MATRIX  InM, float  Scale);
 MATRIX  __stdcall dx_MAdd( MATRIX  In1, MATRIX  In2);
 MATRIX  __stdcall dx_MGetScale( VECTOR  Scale);
@@ -3010,6 +3010,12 @@ enum
     ,DX_CHARCODEFORMAT_UTF32LE = 32766
     ,DX_CHARCODEFORMAT_UTF32BE = 32767
 };
+typedef struct tagMATRIX_D
+{
+    double                    m[4][4] ;
+} MATRIX_D, *LPMATRIX_D ;
+
+int dx_MV1SetMatrixD( int MHandle, MATRIX_D Matrix ) ;
 ]]
 --====================================================================
 -- load

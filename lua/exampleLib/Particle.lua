@@ -1,14 +1,14 @@
 
---====================================================================
--- @module particle
---====================================================================
+----------------------------------------------------------------------
+-- @module Particle
+----------------------------------------------------------------------
+
 local ffi = require("ffi")
 local bit = require("bit")
 local DxLib = require("DxLib_ffi");
 --====================================================================
 
 ----------------------------------------------------------------------
--- get rotate pos 
 -- @param ox --origin Pos x
 -- @param oy
 -- @param x -- pos
@@ -27,14 +27,7 @@ local function rotPoint(ox,oy,x,y,angleRad)
 end
 --====================================================================
 
--- -factory ParticleSingle
-----------------------------------------------------------------------
--- -param imageHandle
--- -param startX particle start Posx
--- -param startY particle start Posx
--- -constructor 
--- -within Constrcutor
-----------------------------------------------------------------------
+--====================================================================
 function createParticleSingle(imageHandle,startX,startY)
     local ParticleSingle ={}
     ParticleSingle.x = startX or 0
@@ -159,13 +152,14 @@ function createParticleSingle(imageHandle,startX,startY)
 end 
 --====================================================================
 
+----------------------------------------------------------------------
 -- @factory ParticleSingle
 
 ----------------------------------------------------------------------
 -- @param[opt=100] maxNum
 -- @param[opt=1/1000*30] waitTime default 1/1000 *30 -- 30 ms
--- @constructor 
--- @within Constrcutor
+-- @constructor
+-- @within Constructor
 ----------------------------------------------------------------------
 function createParticleManager(maxNum,waitTime)
     local ParticleManager = {}

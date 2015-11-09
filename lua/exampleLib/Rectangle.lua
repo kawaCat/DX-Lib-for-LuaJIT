@@ -117,10 +117,12 @@ function createRectangle(x,y,width,height)
     --================================================================
     
     ------------------------------------------------------------------
+    -- set parent rect . if need.
     -- @param rectangle  if disable parent Rectangle , call as Rectangle(in arg) is nil.
     ------------------------------------------------------------------
     function Rectangle:setParentRect(rectangle)
         self.parentRect = rectangle; 
+        --rectangle:addChildRect(rectangle)
         table.insert (self.parentRect.childRect,self);
     end ;
     --================================================================
@@ -272,10 +274,10 @@ function createRectangle(x,y,width,height)
         --local mat = self.matrix;
         local mat = self:getAngleMat();
         --============================================================
-        local zRad_ =  math.atan2( mat.m[0][1],mat.m[0][0])
+        local zRad_ =  math.atan2( mat.m[1][0],mat.m[0][0])
         local yRad_ = -math.asin ( mat.m[0][2]);
         --local yRad_ =  math.atan2 ( mat.m[0][2],mat.m[0][0]);
-        local xRad_ =  math.atan2 ( mat.m[1][2],mat.m[1][1]) 
+        local xRad_ =  math.atan2 ( mat.m[2][1],mat.m[2][2]) 
         --============================================================
         return xRad_,yRad_,zRad_;
     end 
@@ -470,15 +472,59 @@ end
 -- ???
 -- test 
 -- local test  = createRectangle()
--- local x_deg = 90
--- local y_deg = 90
--- local z_deg = 120
+-- local x_deg = 10
+-- local y_deg = 120
+-- local z_deg = 30
 -- test:setAngle(math.rad(x_deg),math.rad(y_deg),math.rad(z_deg));
  
 -- local xrad ,yrad,zrad = test:getAngle()
--- xrad =math.deg(xrad)
+-- xrad =math.deg(xrad -math.pi)
 -- yrad =math.deg(yrad)
 -- zrad =math.deg(zrad)
 -- print ( xrad,yrad,zrad)
 
-
+--====================================================================
+function _MulMatrix(In1,In2)
+    --================================================================
+    --local mat = DxLib.dx_MGetIdent() ;
+    local mat =DxLib.dx_MGetTranslate( DxLib.dx_VGet(0,0,0))
+    --================================================================
+    mat.m[0][0] = In1.m[0][0] * In2.m[0][0] + In1.m[0][1] * In2.m[1][0] 
+                + In1.m[0][2] * In2.m[2][0] + In1.m[0][3] * In2.m[3][0];
+    mat.m[0][1] = In1.m[0][0] * In2.m[0][1] + In1.m[0][1] * In2.m[1][1] 
+                + In1.m[0][2] * In2.m[2][1] + In1.m[0][3] * In2.m[3][1];
+    mat.m[0][2] = In1.m[0][0] * In2.m[0][2] + In1.m[0][1] * In2.m[1][2] 
+                + In1.m[0][2] * In2.m[2][2] + In1.m[0][3] * In2.m[3][2];
+    mat.m[0][3] = In1.m[0][0] * In2.m[0][3] + In1.m[0][1] * In2.m[1][3] 
+                + In1.m[0][2] * In2.m[2][3] + In1.m[0][3] * In2.m[3][3];
+    --================================================================
+    mat.m[1][0] = In1.m[1][0] * In2.m[0][0] + In1.m[1][1] * In2.m[1][0] 
+                + In1.m[1][2] * In2.m[2][0] + In1.m[1][3] * In2.m[3][0];
+    mat.m[1][1] = In1.m[1][0] * In2.m[0][1] + In1.m[1][1] * In2.m[1][1] 
+                + In1.m[1][2] * In2.m[2][1] + In1.m[1][3] * In2.m[3][1];
+    mat.m[1][2] = In1.m[1][0] * In2.m[0][2] + In1.m[1][1] * In2.m[1][2] 
+                + In1.m[1][2] * In2.m[2][2] + In1.m[1][3] * In2.m[3][2];
+    mat.m[1][3] = In1.m[1][0] * In2.m[0][3] + In1.m[1][1] * In2.m[1][3] 
+                + In1.m[1][2] * In2.m[2][3] + In1.m[1][3] * In2.m[3][3];
+    --================================================================
+    mat.m[2][0] = In1.m[2][0] * In2.m[0][0] + In1.m[2][1] * In2.m[1][0] 
+                + In1.m[2][2] * In2.m[2][0] + In1.m[2][3] * In2.m[3][0];
+    mat.m[2][1] = In1.m[2][0] * In2.m[0][1] + In1.m[2][1] * In2.m[1][1] 
+                + In1.m[2][2] * In2.m[2][1] + In1.m[2][3] * In2.m[3][1];
+    mat.m[2][2] = In1.m[2][0] * In2.m[0][2] + In1.m[2][1] * In2.m[1][2] 
+                + In1.m[2][2] * In2.m[2][2] + In1.m[2][3] * In2.m[3][2];
+    mat.m[2][3] = In1.m[2][0] * In2.m[0][3] + In1.m[2][1] * In2.m[1][3] 
+                + In1.m[2][2] * In2.m[2][3] + In1.m[2][3] * In2.m[3][3];
+    --================================================================
+    mat.m[3][0] = In1.m[3][0] * In2.m[0][0] + In1.m[3][1] * In2.m[1][0] 
+                + In1.m[3][2] * In2.m[2][0] + In1.m[3][3] * In2.m[3][0];
+    mat.m[3][1] = In1.m[3][0] * In2.m[0][1] + In1.m[3][1] * In2.m[1][1] 
+                + In1.m[3][2] * In2.m[2][1] + In1.m[3][3] * In2.m[3][1];
+    mat.m[3][2] = In1.m[3][0] * In2.m[0][2] + In1.m[3][1] * In2.m[1][2] 
+                + In1.m[3][2] * In2.m[2][2] + In1.m[3][3] * In2.m[3][2];
+    mat.m[3][3] = In1.m[3][0] * In2.m[0][3] + In1.m[3][1] * In2.m[1][3] 
+                + In1.m[3][2] * In2.m[2][3] + In1.m[3][3] * In2.m[3][3];  
+    --================================================================
+    return mat;
+end
+--====================================================================
