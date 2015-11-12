@@ -112,6 +112,19 @@ end
 --====================================================================
 
 --====================================================================
+function drawLine(x1,y1,x2,y2,color,thick)
+    local color_ = color or DxLib.dx_GetColor(0,0,0)
+    local thick_ = thick or 1
+    DxLib.dx_DrawLine( x1
+                     , y1 
+                     , x2
+                     , y2 
+                     , color_
+                     , thick_ ); -- thickness
+end
+--====================================================================
+
+--====================================================================
 function drawString(str,x,y,color)
     local color_ = color or DxLib.dx_GetColor(0,0,0)
     DxLib.dx_DrawString( x, y, str, color_ , -1 );

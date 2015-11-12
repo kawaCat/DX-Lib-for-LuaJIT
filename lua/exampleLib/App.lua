@@ -198,6 +198,8 @@ function App.run()
                 isMouseDrag =false
             end 
         end
+        App.mouseDistanceX = mouseX[0] -lastMouseX;
+        App.mouseDistanceY = mouseY[0] -lastMouseY;
         lastMouseX = mouseX[0];
         lastMouseY = mouseY[0];
         --============================================================

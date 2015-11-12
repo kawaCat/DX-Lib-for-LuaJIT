@@ -23,12 +23,6 @@ local count = 0;
 local fpsLimit = createFpsLimit();
 --====================================================================
 
--- mmd model
-local modelHandle = nil -- create in prepare()
-local attachAnimIndex = nil
-local animationTime =0;
-local totalAnimTime = nil
-local animSpeed = 0.28
 local isAnimationStart =false;
 
 -- idel text Image

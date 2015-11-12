@@ -16,7 +16,7 @@ local DxLib = require("DxLib_ffi");
 -- @param angleRad --angleRad
 -- @return first x,second y
 ----------------------------------------------------------------------
-local function rotPoint(ox,oy,x,y,angleRad)
+function rotPoint(ox,oy,x,y,angleRad)
     local lx = x -ox
     local ly = y -oy
     local px = lx * math.cos(angleRad) - ly *math.sin(angleRad)

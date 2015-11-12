@@ -11,7 +11,7 @@ local screenH = 350;
 --====================================================================
 
 -- font
-local fontSize = 25
+local fontSize = 20
 local fontHandle = nil;
 
 -- for animation 

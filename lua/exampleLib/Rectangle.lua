@@ -471,14 +471,15 @@ end
 
 -- ???
 -- test 
+
 -- local test  = createRectangle()
--- local x_deg = 10
--- local y_deg = 120
--- local z_deg = 30
+-- local x_deg = 120
+-- local y_deg = 0
+-- local z_deg = 40
 -- test:setAngle(math.rad(x_deg),math.rad(y_deg),math.rad(z_deg));
  
 -- local xrad ,yrad,zrad = test:getAngle()
--- xrad =math.deg(xrad -math.pi)
+-- xrad =math.deg(xrad )
 -- yrad =math.deg(yrad)
 -- zrad =math.deg(zrad)
 -- print ( xrad,yrad,zrad)
