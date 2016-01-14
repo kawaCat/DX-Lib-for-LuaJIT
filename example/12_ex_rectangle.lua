@@ -10,7 +10,7 @@ local screenH = 350;
 
 -- font
 local jpFontSize = 23
-local loadedFont = nil   -- load and font Resource
+local loadedFont = nil  
 local fontSize = 20
 
 -- for animation 
@@ -71,13 +71,6 @@ function App.onMouseMove(mouseX,mouseY)end
 function App.onMouseDrag(MouseEvent,mouseX,mouseY)
     if (  App.isMousePress == true and targetImage ~= nil )
     then 
-        -- local r = targetImage:getMatrixedRect()
-        -- local tv,sv,av = targetImage:getOffsetVector()
-        -- -- ??? angle ?
-        -- --=========================================================
-        -- targetImage:setTranslate( rotMouseX -tv.x -r.width/2  -r.lastPos[1].x 
-        --                         , rotMouseY -tv.y -r.height/2 -r.lastPos[1].y  
-        --                         , 0)
         --============================================================
         local addX = mouseX -App.lastMouseX;
         local addY = mouseY -App.lastMouseY;
@@ -86,10 +79,6 @@ function App.onMouseDrag(MouseEvent,mouseX,mouseY)
         if ( targetImage.parentRect ~=nil)
         then 
             addVec = DxLib.dx_VTransform(addVec,targetImage.parentRect:getInverseAngleMat());
-            -- local xr,yr,zr = targetImage:getAngle()
-            -- print ( math.deg(xr),math.deg(yr),math.deg(zr))
-            -- --=====================================================
-            -- ?? 
         end 
         --============================================================
         targetImage:setTranslate( targetImage.translateVector.x + addVec.x 

@@ -11,7 +11,7 @@ local screenH = 350;
 -- font
 local fontSize = 15
 local jpFontSize = 23
-local dxFontHandle = nil -- create App.preapre()
+local dxFontHandle = nil 
 local jpFontHandle = nil 
 
 -- for animation 
@@ -36,8 +36,6 @@ function App.init ()
 end
 --====================================================================
 function App.prepare()
-    -- after dx_init()'s  setting.
-    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 );
     jpFontHandle = DxLib.dx_CreateFontToHandle( "Ricty" -- japanese font
                                               , jpFontSize

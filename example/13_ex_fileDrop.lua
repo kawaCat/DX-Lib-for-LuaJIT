@@ -10,7 +10,7 @@ local screenH = 350;
 
 -- font
 local jpFontSize = 23
-local loadedFont = nil   -- load and font Resource
+local loadedFont = nil  
 local fontSize = 20
 
 -- for animation 
@@ -45,8 +45,6 @@ end
 --====================================================================
 function App.prepare()
     
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20

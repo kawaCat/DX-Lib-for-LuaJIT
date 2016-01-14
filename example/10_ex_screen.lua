@@ -9,8 +9,8 @@ local screenH = 350;
 --====================================================================
 -- font
 local jpFontSize = 23
-local dxFontHandle = nil -- create App.preapre()
-local loadedFont = nil   -- load and font Resource
+local dxFontHandle = nil 
+local loadedFont = nil   
 local fontSize = 20
 
 -- for animation 
@@ -22,7 +22,7 @@ local fpsLimit = createFpsLimit();
 --image Effect
 local makeScreenW = screenW/2
 local makeScreenH = screenH/2
-local screenHandle = nil --create in prepare()
+local screenHandle = nil 
 local penImage = nil   
 
 --

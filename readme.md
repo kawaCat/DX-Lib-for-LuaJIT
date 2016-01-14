@@ -25,3 +25,9 @@ LuaJIT ( http://luajit.org/ )
 
 ## example
 ![example08.png](image/example08.PNG "example08.png")
+
+![example11.png](image/example11.PNG "example11.png")
+
+![example07.png](image/example07.PNG "example07.png")
+
+![example03.png](image/example03.PNG "example03.png")

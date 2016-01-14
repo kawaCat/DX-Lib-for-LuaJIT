@@ -10,8 +10,8 @@ local screenH = 350;
 
 -- font
 local jpFontSize = 23
-local dxFontHandle = nil -- create App.preapre()
-local loadedFont = nil   -- load and font Resource
+local dxFontHandle = nil
+local loadedFont = nil  
 local fontSize = 20
 
 -- for animation 

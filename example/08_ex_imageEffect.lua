@@ -9,9 +9,9 @@ local screenH = 350;
 --====================================================================
 -- font
 local jpFontSize = 23
-local dxFontHandle = nil -- create App.preapre()
-local jpFontHandle = nil --
-local loadedFont = nil   -- load and font Resource
+local dxFontHandle = nil 
+local jpFontHandle = nil 
+local loadedFont = nil   
 local fontSize = 20
 
 -- for animation 
@@ -24,7 +24,7 @@ local fpsLimit = createFpsLimit();
 -- imageHandle Table
 local imageHandleTable = {} 
 
--- load and apply effect.
+--
 local blurGraph = nil
 local monoGraph = nil
 local invertGraph = nil
@@ -39,17 +39,15 @@ function App.init ()
     DxLib.dx_SetAlwaysRunFlag(true)
     DxLib.dx_SetBackgroundColor(255,255,255)
     --================================================================
-    --DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
+    DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  --anti Alias
     --================================================================
     DxLib.dx_DxLib_Init();
     --================================================================
 end
 --====================================================================
 function App.prepare()
-    -- after dx_init()'s  setting.
     
-    -- prepared font. ".dft" was created font by DX Lib tools.
-    dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
+    dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); 
     jpFontHandle = DxLib.dx_CreateFontToHandle( "Ricty" -- japanese font
                                               , jpFontSize
                                               , 0
@@ -59,19 +57,15 @@ function App.prepare()
                                               , false
                                               , false
                                               )
-    -- load and font Resource
-    -- need call  loadedFont:destory()  at app exit .
-    loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
+    loadedFont = createFontResource("resources/DS Siena Black.ttf"); 
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name
     fontSize = 20
-    DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) --draw font type.
+    DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING) 
 
-    -- set CharCode to fontHandle
     DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,dxFontHandle)
     DxLib.dx_SetFontCharCodeFormatToHandle(DxLib.DX_CHARCODEFORMAT_UTF8,jpFontHandle)
     --================================================================
     
-    -- load and apply effect.
     blurGraph = DxLib.dx_LoadGraph( "resources/pen.png", false );
     DxLib.dx_GraphFilterS(blurGraph, DxLib.DX_GRAPH_FILTER_GAUSS,16,100 * 14,0,0,0,0 ) 
     table.insert (imageHandleTable,blurGraph )
@@ -81,7 +75,8 @@ function App.prepare()
     table.insert (imageHandleTable,monoGraph )
 
     invertGraph = DxLib.dx_LoadGraph( "resources/pen.png", false );
-    DxLib.dx_GraphFilterS(invertGraph, DxLib.DX_GRAPH_FILTER_INVERT,0,0,0,0,0,0 ) 
+    -- DXLib bug.
+    -- DxLib.dx_GraphFilterS(invertGraph, DxLib.DX_GRAPH_FILTER_INVERT,0,0,0,0,0,0 ) 
     table.insert (imageHandleTable,invertGraph )
 end
 --====================================================================
@@ -106,10 +101,8 @@ end
 function App.onDraw(dt)
     --================================================================
     drawBackGround(screenW,screenH,2)
-    --drawSineCurve(20,count,screenW,screenH);
     --================================================================
     
-    -- change blendmode
     if ( isBlendMode_Sub == true )
     then 
         DxLib.dx_SetDrawBlendMode( DxLib.DX_BLENDMODE_SUB , 255 ) ;

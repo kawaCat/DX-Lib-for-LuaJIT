@@ -10,9 +10,9 @@ local screenH = 350;
 
 -- font
 local jpFontSize = 23
-local dxFontHandle = nil -- create App.preapre()
-local jpFontHandle = nil --
-local loadedFont = nil   -- load and font Resource
+local dxFontHandle = nil 
+local jpFontHandle = nil 
+local loadedFont = nil   
 local fontSize = 20
 
 -- for animation 
@@ -38,7 +38,6 @@ end
 --====================================================================
 function App.prepare()
     
-    -- prepared font. ".dft" was created font by DX Lib tools.
     dxFontHandle = DxLib.dx_LoadFontDataToHandle( "resources/sample.dft", 0 ); --prepared font
     jpFontHandle = DxLib.dx_CreateFontToHandle( "Ricty" -- japanese font
                                               , jpFontSize
@@ -49,7 +48,6 @@ function App.prepare()
                                               , false
                                               , false
                                               )
-    -- load and font Resource
     -- need call  loadedFont:destory()  at app exit .
     loadedFont = createFontResource("resources/DS Siena Black.ttf"); --font path
     DxLib.dx_ChangeFont( "DS Siena Black" ,-1) ; -- font Name

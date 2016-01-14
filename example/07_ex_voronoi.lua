@@ -51,7 +51,7 @@ function createVoronoiImage(w,h)
     --================================================================
     local piexlTable = voronoi:getPixelTable();
     --================================================================
-     -- direct draw pixel 
+    -- direct draw pixel 
     local pos = 1;
     for y=0 ,height_-1
     do 

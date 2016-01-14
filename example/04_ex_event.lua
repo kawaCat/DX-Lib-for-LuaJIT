@@ -19,21 +19,17 @@ local fpsLimit = createFpsLimit();
 
 --====================================================================
 function App.init ()
-    -- default init
     DxLib.dx_ChangeWindowMode(true)
     DxLib.dx_SetGraphMode( screenW, screenH, 32,-1) ; -- window size
     DxLib.dx_SetOutApplicationLogValidFlag(false)
     DxLib.dx_SetAlwaysRunFlag(true)
     DxLib.dx_SetBackgroundColor(255,255,255)
     --================================================================
-    -- DxLib.dx_SetFullSceneAntiAliasingMode(4,2)  -- enable anti Alias
-    --================================================================
     DxLib.dx_DxLib_Init();
     --================================================================
 end
 --====================================================================
 function App.prepare()
-    -- after dx_init()'s  setting.
     DxLib.dx_ChangeFont( "Arial" ,-1) ;
     DxLib.dx_ChangeFontType( DxLib.DX_FONTTYPE_ANTIALIASING)
 end

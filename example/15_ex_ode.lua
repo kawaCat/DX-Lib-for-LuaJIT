@@ -54,9 +54,9 @@ local lightDirection = {x =0,y =0,z =0};
 --====================================================================
 function addBox(posX,posY,posZ)
     local mass = 1 --(kg)
-    local lenghX = boxLengh
-    local lenghY = boxLengh;
-    local lenghZ = boxLengh;
+    local lenghX = boxLengh*math.random()
+    local lenghY = boxLengh*math.random();
+    local lenghZ = boxLengh*math.random();
     --================================================================
     local boby = ode.dBodyCreate(world);
     local m = ffi.new("dMass[1]");
@@ -395,9 +395,11 @@ end
 --====================================================================
 
 --====================================================================
-local odeModelMat = ffi.new("dMatrix4[1]")
+local tempMat = ffi.new("dMatrix4[1]")
 local odeMatT = ffi.new("dMatrix4[1]")
 local odeMatR = ffi.new("dMatrix4[1]")
+local odeMatS = ffi.new("dMatrix4[1]")
+local outMat = ffi.new("dMatrix4[1]")
 local mt = ffi.new("MATRIX[1]")
 --====================================================================
 local function _convertOdeMatToDxMat(r)
@@ -444,9 +446,14 @@ local function _drawObject()
         --============================================================
         
         --============================================================
-        odeMatT[0][0] =  v.lX/2; odeMatT[0][1] =        0; odeMatT[0][2] =       0; odeMatT[0][3] = 0;
-        odeMatT[0][4] =       0; odeMatT[0][5] =   v.lY/2; odeMatT[0][6] =       0; odeMatT[0][7] = 0;
-        odeMatT[0][8] =       0; odeMatT[0][9] =        0; odeMatT[0][10]=  v.lZ/2; odeMatT[0][11]= 0;
+        odeMatS[0][0] =  v.lX/2; odeMatS[0][1] =        0; odeMatS[0][2] =       0; odeMatS[0][3] = 0;
+        odeMatS[0][4] =       0; odeMatS[0][5] =   v.lY/2; odeMatS[0][6] =       0; odeMatS[0][7] = 0;
+        odeMatS[0][8] =       0; odeMatS[0][9] =        0; odeMatS[0][10]=  v.lZ/2; odeMatS[0][11]= 0;
+        odeMatS[0][12]=       0; odeMatS[0][13]=        0; odeMatS[0][14]=       0; odeMatS[0][15]= 1;
+        --============================================================
+        odeMatT[0][0] =       1; odeMatT[0][1] =        0; odeMatT[0][2] =       0; odeMatT[0][3] = 0;
+        odeMatT[0][4] =       0; odeMatT[0][5] =        1; odeMatT[0][6] =       0; odeMatT[0][7] = 0;
+        odeMatT[0][8] =       0; odeMatT[0][9] =        0; odeMatT[0][10]=       1; odeMatT[0][11]= 0;
         odeMatT[0][12]= pos_[0]; odeMatT[0][13]=  pos_[1]; odeMatT[0][14]= pos_[2]; odeMatT[0][15]= 1;
         --============================================================
         odeMatR[0][0] = r[0]; odeMatR[0][1] = r[1]; odeMatR[0][2] = r[2];  odeMatR[0][3] = r[3];
@@ -455,10 +462,11 @@ local function _drawObject()
         odeMatR[0][12]= 0;    odeMatR[0][13]= 0;    odeMatR[0][14]= 0;     odeMatR[0][15]= 1;
         
         --============================================================
-        ode.dMultiply1 (odeModelMat[0],  odeMatR[0], odeMatT[0], 4,4,4);
-        local mat = _convertOdeMatToDxMat(odeModelMat[0])
+        ode.dMultiply0 (tempMat[0],  odeMatS[0], odeMatR[0], 4,4,4);
+        ode.dMultiply0 (outMat[0],   tempMat[0], odeMatT[0], 4,4,4);
+        local mat = _convertOdeMatToDxMat(outMat[0])
         --============================================================
-        DxLib.dx_MV1SetMatrix(box_Model,mat); 
+        DxLib.dx_MV1SetMatrix( box_Model,mat); 
         DxLib.dx_MV1DrawModel( box_Model ) ;  
     end 
 --++
